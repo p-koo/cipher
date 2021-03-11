@@ -1,12 +1,11 @@
 """Useful functions."""
 
-import os 
+import os
 
 
 # TODO: Function to load tsv to dataframe
 
 # TODO: function to save dataframe to tsv
-
 
 
 def make_directory(dirpath, verbose=1):
@@ -19,7 +18,7 @@ def make_directory(dirpath, verbose=1):
 
     Returns
     -------
-	
+
 
     Examples
     --------
@@ -27,10 +26,6 @@ def make_directory(dirpath, verbose=1):
     >>> make_directory(dirpath)
 
     """
-  if not os.path.isdir(dirpath):
-    os.mkdir(dirpath)
-    print("making directory: " + dirpath)
-
-
-
-
+    if not os.path.isdir(dirpath):
+        os.mkdir(dirpath)
+        print("making directory: " + dirpath)

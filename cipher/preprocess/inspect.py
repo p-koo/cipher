@@ -4,8 +4,5 @@
 
 # TODO: Function to plot histogram of GC content
 
-# TODO: Table to look at N content, GC content, overlap w.r.t. genes, transposons, repeats 
-
-
-
-
+# TODO: Table to look at N content, GC content, overlap w.r.t. genes, transposons,
+# repeats
