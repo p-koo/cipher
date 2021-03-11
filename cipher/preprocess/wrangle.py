@@ -10,27 +10,27 @@ def convert_one_hot(sequence, max_length=None):
 
 	one_hot_seq = []
 	for seq in sequence:
-      seq = seq.upper()
-      seq_length = len(seq)
-      one_hot = np.zeros((4,seq_length))
-      index = [j for j in range(seq_length) if seq[j] == 'A']
-      one_hot[0,index] = 1
-      index = [j for j in range(seq_length) if seq[j] == 'C']
-      one_hot[1,index] = 1
-      index = [j for j in range(seq_length) if seq[j] == 'G']
-      one_hot[2,index] = 1
-      index = [j for j in range(seq_length) if (seq[j] == 'U') | (seq[j] == 'T')]
-      one_hot[3,index] = 1
+      		seq = seq.upper()
+      		seq_length = len(seq)
+      		one_hot = np.zeros((4,seq_length))
+      		index = [j for j in range(seq_length) if seq[j] == 'A']
+      		one_hot[0,index] = 1
+      		index = [j for j in range(seq_length) if seq[j] == 'C']
+      		one_hot[1,index] = 1
+      		index = [j for j in range(seq_length) if seq[j] == 'G']
+      		one_hot[2,index] = 1
+      		index = [j for j in range(seq_length) if (seq[j] == 'U') | (seq[j] == 'T')]
+      		one_hot[3,index] = 1
 
-      # handle boundary conditions with zero-padding
-      if max_length:
-          offset1 = int((max_length - seq_length)/2)
-          offset2 = max_length - seq_length - offset1
+		# handle boundary conditions with zero-padding
+		if max_length:
+			offset1 = int((max_length - seq_length)/2)
+			offset2 = max_length - seq_length - offset1
 
-          if offset1:
-              one_hot = np.hstack([np.zeros((4,offset1)), one_hot])
-          if offset2:
-              one_hot = np.hstack([one_hot, np.zeros((4,offset2))])
+			if offset1:
+				one_hot = np.hstack([np.zeros((4,offset1)), one_hot])
+			if offset2:
+				one_hot = np.hstack([one_hot, np.zeros((4,offset2))])
 
 		one_hot_seq.append(one_hot)
 
