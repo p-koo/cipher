@@ -90,6 +90,9 @@ def gc_content_histgram_from_one_hot(pos_one_hot, neg_one_hot):
 
   gc_content_histgram_from_one_hot(pos_one_hot,neg_one_hot)
   '''
+  import seaborn as sns
+  import matplotlib.pyplot as plt
+
   # nucleotide frequency matched background
   seq_pos = np.squeeze(np.argmax(pos_one_hot, axis=1))
   seq_neg = np.squeeze(np.argmax(neg_one_hot, axis=1))
@@ -99,14 +102,11 @@ def gc_content_histgram_from_one_hot(pos_one_hot, neg_one_hot):
   for s in seq_pos:
       f_pos.append([np.sum(s==0), np.sum(s==1), np.sum(s==2), np.sum(s==3)]) 
   f_pos = np.array(f_pos)/window
-  # summing g+c count for each sequence and rounding value to nearest 2 decimal places: 
+  # summing g+c count for each sequence: 
   gc_pos= [np.round(x[1:3].sum(),2) for x in f_pos]
 
-  from collections import Counter
-  bins = Counter(gc_pos)
-
-  import matplotlib.pyplot as plt
-  plt.bar(bins.keys(), bins.values(),align="edge",width=-0.1,label="GC Pos")
+  
+  sns.histplot(data=gc_pos , color="skyblue", label="GC Pos", kde=True)
   plt.legend(loc="best")
   plt.show()
 
@@ -116,12 +116,12 @@ def gc_content_histgram_from_one_hot(pos_one_hot, neg_one_hot):
       f_neg.append([np.sum(s==0), np.sum(s==1), np.sum(s==2), np.sum(s==3)]) 
   f_neg = np.array(f_neg)/window
   gc_neg= [np.round(x[1:3].sum(),2) for x in f_neg]
-  bins_n = Counter(gc_neg)
-  plt.bar(bins_n.keys(), bins_n.values(),align="edge",width=-0.1,label="GC Neg")
+
+  sns.histplot(data=gc_neg , color="red", label="GC Neg", kde=True)
   plt.legend(loc="best")
   plt.show()
 
-  import seaborn as sns
+  
   sns.histplot(data=gc_pos , color="skyblue", label="GC Pos", kde=True)
   sns.histplot(data=gc_neg, color="red", label="GC Neg", kde=True)
   plt.legend() 
