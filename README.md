@@ -24,3 +24,11 @@ Format your code with `black`.
 ```bash
 black cipher
 ```
+
+## Running tests
+
+Run tests with `pytest`:
+
+```bash
+pytest cipher
+```
