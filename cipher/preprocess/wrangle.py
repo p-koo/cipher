@@ -25,6 +25,3 @@
 # TODO: random split into k-fold cross validation
 
 # TODO: split according to chromosome
-
-
-
