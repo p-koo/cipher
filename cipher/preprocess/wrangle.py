@@ -63,6 +63,52 @@ def enforce_constant_size(bed_path, output_path, window):
     # save dataframe with fixed width window size to a bed file
     df_new.to_csv(output_path, sep='\t', header=None, index=False)
 
+def convert_onehot_to_sequence(one_hot, alphabet='ACGT'):
+    """convert DNA/RNA sequences from one-hot representation to 
+    string representation.
+
+    Parameters
+    ----------
+    one_hot : <numpy.ndarray>
+
+    alphabet : <str>
+
+    Returns
+    -------
+    sequences : <numpy.ndarray>
+    A numpy vector of sequences in string representation. 
+    Example
+    -------
+    >>> one_hot = np.array(
+            [[[1., 0., 0., 0.],
+            [1., 0., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+            [0., 1., 0., 0.]],
+
+            [[0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [0., 1., 0., 0.],
+            [1., 0., 0., 0.]]]
+                )
+    >>> sequences = convert_onehot_to_sequence(one_hot)
+    >>> sequences
+    array([['A', 'A', 'G', 'A', 'C'],
+       ['T', 'C', 'G', 'C', 'A']], dtype=object)
+    """
+    assert alphabet in ['ACGT', 'ACGU'], 'Enter a valid alphabet'
+
+    alphabet = list(alphabet)
+    idx_to_alphabet = {i:a for i, a in enumerate(alphabet)}
+    seqidxs = np.argmax(one_hot, axis=2)  # (N, L)
+    sequences = []
+    for seqidx in seqidxs:
+        seq = pd.Series(seqidx).map(idx_to_alphabet)
+        sequences.append(seq)
+    sequences = np.array(sequences)
+    return sequences
+
 # Function to convert sequence to one-hot
 def convert_one_hot(sequence, max_length=None, dtype=np.float32):
 	"""convert DNA/RNA sequences to a one-hot representation
