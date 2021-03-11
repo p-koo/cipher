@@ -3,22 +3,24 @@
 # TODO: Function to plot histogram of bed sizes
 def plot_bed_histogram(bed_path: str,cutoff : None):
   '''
-  Function to plot histogram of bed file peak sizes; automatically infers compression from extension
+  Function to plot histogram of bed file peak sizes; automatically infers compression from extension and allows for user-input in removing outlier sequence
   
-  Parameters:
-
-  bed_path --> path to .bed file
+  Parameters
+  -----------
+  bed_path : <str>
   
-  cutoff --> user-defined value to remove outlier samples
+  cutoff : <None/int> 
 
-  _________
 
-  Output:
-  
-  histogram of peaks
+  Returns 
   ___________
+
+  histogram of .bed file peak sizes
+  ____________
   
-  Usage:
+  Example
+  ____________
+
   pos_path=ENCFF252PLM.bed.gz
   plot_bed_histogram(pos_path, None)
   '''
@@ -44,44 +46,24 @@ def plot_bed_histogram(bed_path: str,cutoff : None):
 # TODO: Function to plot histogram of GC content
 def gc_content_histgram_from_one_hot(pos_one_hot, neg_one_hot):
   '''
-  Function to plot histogram of of GC content across sequences for pos/neg sequences
+  Function to plot histogram of of GC content across sequences for positive-label and negative-label sequences
   
-  Parameters:
-
-  pos/neg_one_hot --> one_hot encodings produced by convert_one_hot
+  Parameters
+  __________
+  pos_one_hot/neg_one_hot : <numpy.ndarray>
   
 
+  Returns
   _________
-
-  Output:
   
   histograms of:
   1. GC content for pos sequences (x = % GC; y = count of said instances)
   2. GC content for neg sequences
   3. Overlap
+
+  Example
   ___________
   
-  Usage:
-  # get non-overlap between pos peaks and neg peaks
-  print(neg_path)
-  neg_bed_path = os.path.join(data_path, experiment + '_nonoverlap.bed')
-  cmd = ['bedtools', 'intersect', '-v', '-wa', '-a', neg_path, '-b', pos_path, '>', neg_bed_path]
-  process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  stdout, stderr = process.communicate()
-
-  # create new bed file with window enforced
-  neg_bed_path2 = os.path.join(data_path, experiment + '_neg_'+str(window)+'.bed')
-  enforce_constant_size(neg_path, neg_bed_path2, window, compression="gzip")
-
-  # extract sequences from bed file and save to fasta file
-  neg_fasta_path = os.path.join(data_path, experiment + '_neg.fa')
-  cmd = ['bedtools', 'getfasta','-s','-fi', genome_path, '-bed', neg_bed_path2, '-fo', neg_fasta_path]
-  process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  stdout, stderr = process.communicate()
-
-  # parse sequence and chromosome from fasta file
-  neg_seq = parse_fasta(neg_fasta_path)
-
   # filter sequences with absent nucleotides
   neg_seq, _ = filter_nonsense_sequences(neg_seq)
 
