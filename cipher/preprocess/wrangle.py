@@ -233,7 +233,7 @@ def parse_fasta(fasta_path):
     # parse sequence and chromosome from fasta file
     num_data = np.round(sum(1 for line in open(fasta_path))/2).astype(int)
     fin = open(fasta_path, "r")
-    named = []
+    names = []
     sequences = []
     for j in range(num_data):
         names.append(fin.readline()[1:])
