@@ -200,7 +200,7 @@ def convert_one_hot(sequence, alphabet='ACGT'):
     alphabet_dict = {a: i for i, a in enumerate(list(alphabet))}
 
     # convert sequences to one-hot
-    one_hot = np.zeros((len(sequences),len(sequences[0]),len(alphabet)))
+    one_hot = np.zeros((len(sequence),len(sequence[0]),len(alphabet)))
     for n, seq in enumerate(sequence):
         for l, s in enumerate(seq):
             one_hot[n,l,alphabet_dict[s]] = 1.
