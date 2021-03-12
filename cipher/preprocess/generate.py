@@ -59,21 +59,21 @@ def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment,
     one_hot = np.vstack([pos_one_hot, neg_one_hot_gc])
     labels = np.vstack([np.ones((len(pos_one_hot), 1)), np.zeros((len(neg_one_hot_gc), 1))])
     names = np.concatenate([pos_names, neg_names])
-
+    names = names.astype("S")
+    
     # shuffle indices for train, validation, and test sets
     train, valid, test, indices = wrangle.split_dataset(one_hot, labels, valid_frac=valid_frac, test_frac=test_frac)
 
     # save to hdf5 file
     file_path = os.path.join(data_path, experiment+'_'+str(window)+'.h5')
-    with h5py.File(file_path, 'w') as fout:
-        x_train = fout.create_dataset('x_train', data=train[0], dtype='float32', compression="gzip")
-        y_train = fout.create_dataset('y_train', data=train[1], dtype='int8',    compression="gzip")
-        y_test = fout.create_dataset('train_names', data=names[indices[0]], dtype='str', compression="gzip")
-        x_valid = fout.create_dataset('x_valid', data=valid[0], dtype='float32', compression="gzip")
-        y_valid = fout.create_dataset('y_valid', data=valid[1], dtype='int8',    compression="gzip")
-        y_test = fout.create_dataset('valid_names', data=names[indices[1]], dtype='str', compression="gzip")
-        x_test  = fout.create_dataset('x_test',  data=test[0],  dtype='float32', compression="gzip")
-        y_test  = fout.create_dataset('y_test',  data=test[1],  dtype='int8',    compression="gzip")
-        y_test = fout.create_dataset('test_names', data=names[indices[2]], dtype='str', compression="gzip")
-    print('Saved to: ' + file_path)
-
+    with h5py.File(file_path, "w") as fout:
+        x_train = fout.create_dataset("x_train", data=train[0], compression="gzip")
+        y_train = fout.create_dataset("y_train", data=train[1], compression="gzip")
+        y_test = fout.create_dataset("train_names", data=names[indices[0]], compression="gzip")
+        x_valid = fout.create_dataset("x_valid", data=valid[0], compression="gzip")
+        y_valid = fout.create_dataset("y_valid", data=valid[1], compression="gzip")
+        y_test = fout.create_dataset("valid_names", data=names[indices[1]], compression="gzip")
+        x_test = fout.create_dataset("x_test", data=test[0], compression="gzip")
+        y_test = fout.create_dataset("y_test", data=test[1], compression="gzip")
+        y_test = fout.create_dataset("test_names", data=names[indices[2]], compression="gzip")
+    print("Saved to: " + file_path)
