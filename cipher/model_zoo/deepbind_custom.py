@@ -6,11 +6,11 @@
 from tensorflow import keras
 
 
-def deepbind(input_shape, output_shape, units=[24, 48], dropout=[0.1, 0.5]):
+def deepbind_custom(input_shape, output_shape, activation='relu', units=[24, 48], dropout=[0.1, 0.5]):
+
 
     """
-    Creates a keras neural network model in the original DeepBind architecture. 
-    User may specify some architecture details directly, by using the units and dropout arguments. 
+    Creates a keras neural network model similar to the original DeepBind architecture. The difference is that it allows for custom specification of the activation of the first convolutional layer. 
 
 
     Parameters
@@ -21,11 +21,14 @@ def deepbind(input_shape, output_shape, units=[24, 48], dropout=[0.1, 0.5]):
     output_shape: int
         Number of output categories.
 
+    activation: str
+        A string specifying the type of activation. Example: 'relu', 'exponential', ...
+
     units: list
-        Optional parameter. A list of shape [int, int] that can be used to specify the number of filters. It provide more external control.  
+        Optional parameter. A list of shape [int, int] that can be used to specify the number of filters. It provide more external control of the architecture.  
 
     dropout: list
-        Optional parameter. A list of shape [probability, probability] that can be used to externally control the probabilities of dropouts in the main architecture.   
+        Optional parameter. A list of the form [probability, probability] that can be used to externally control the probabilities of dropouts in the main architecture.   
 
 
     Returns
@@ -35,7 +38,7 @@ def deepbind(input_shape, output_shape, units=[24, 48], dropout=[0.1, 0.5]):
 
     Example
     -----------
-    model = deepbind( (200,4), 1 , [24,48], [0.1, 0.5] )
+    model = deepbind_custom( (200,4), 1 , 'relu', [24,48], [0.1, 0.5] )
 
     """
 
@@ -47,7 +50,7 @@ def deepbind(input_shape, output_shape, units=[24, 48], dropout=[0.1, 0.5]):
         filters=units[0],
         kernel_size=23,
         strides=1,
-        activation="relu",
+        activation=activation,
         use_bias=True,
         padding="same",
     )(inputs)
@@ -65,5 +68,3 @@ def deepbind(input_shape, output_shape, units=[24, 48], dropout=[0.1, 0.5]):
 
     # create keras model
     return keras.Model(inputs=inputs, outputs=outputs)
-
-
