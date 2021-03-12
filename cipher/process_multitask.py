@@ -15,7 +15,7 @@ assembly: str
     Optional. Default to be 'GRCh38'
 chrom_size:str
     Optional. Location for .chome.size file
-subset: str 
+subset: str
     Optional. Path where the subset of metadata table used will be saved as a to_csv.
     Default to current directory
 criteria: dict
@@ -47,11 +47,11 @@ def main():
     parser.add_option('--assembly', dest='g_assembly',default ='GRCh38', help='genome assembly used for reference. Optional.')
     parser.add_option('--chrom_size', dest='chrom_size', help='Location of chromosome size file')
     parser.add_option('--subset', dest='subset_output',default = 'selected_data.csv',help='path where the subset of metadata table used will be saved as a to_csv')
-    parser.add_option('--criteria', dest='criteria', default = {'Output type':'IDR thresholded peaks'} ,help='dictionary of column, value pairs to use in making a selection')
+    parser.add_option('--criteria', dest='criteria', default = {} ,help='dictionary of column, value pairs to use in making a selection')
     parser.add_option('--exp_accession_list', dest='exp_accession',default=None, help='List of experiments to select, if empty select all in the metadata table')
     parser.add_option('--merge_overlap',dest = 'overlap',default=200, help='if two peak regions overlaps more than this amount, they will be re-centered and merged into a single sample')
     (options,args) = parser.parse_args()
-   
+
     #call package functiond
     create_samplefile(options.data_dir, options.metadata_path, assembly = options.g_assembly,
                       sample_output_path=options.subset_output,
@@ -62,10 +62,10 @@ def main():
     multitask_bed_generation(exp_output,chrom_lengths_file=options.chrom_size,
                             feature_size=options.feature_size,merge_overlap=options.overlap,
                              out_prefix=options.bed_output)
-    
+
     subprocess.call('bedtools getfasta -fi {} -s -bed {} -fo {}'.format(options.fasta,options.bed_output,options.fasta_output), shell=True)
     make_h5(options.fasta,bed_output+'_act.txt',options.h5_output,options.header_output)
-    
 
-if __name__ == "__main__":  
+
+if __name__ == "__main__":
     main()
