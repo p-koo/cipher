@@ -132,8 +132,12 @@ def create_samplefile(data_dir, metadata_path, assembly = 'GRCh38',
         list of experiments to select, if empty select all in the metadata table
 
     '''
+    assert metadata_path.endswith('.tsv') or metadata_path.endswith('.csv'), print('Metadata should be a tsv or a csv file')
+    if metadata_path.endswith('.tsv'):
+        metadata = pd.read_csv(metadata_path, sep='\t')
+    elif metadata_path.endswith('.csv'):
+        metadata = pd.read_csv(metadata_path, sep=',')
 
-    metadata = pd.read_csv(metadata_path, sep='\t')
 
     if not exp_accession_list:
         print('Generating sample file from all of the metadata table')
