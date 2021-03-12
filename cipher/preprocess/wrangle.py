@@ -671,6 +671,84 @@ def split_dataset(one_hot, labels, valid_frac=0.1, test_frac=0.2):
 
 
 # TODO: split according to chromosome
+def split_dataset_by_chr(one_hot, labels, names, chromosomes, chromosome_split):
+    """takes list of chromosomes and which split to put them in
+       takes names of peaks and extracts chromosomes
+       
+       Parameters
+       ____________
+       one_hot : < array of one_hot encoded sequences >
+       labels : < array indicating class membership of corresponding sample >
+       names : < array of sequence chromosomal coordinates 
+       chromosomes : < list of chromosomes in each cohort (test/validation) >
+       chromosome_split : < list containing corresponding cohort >
+
+       Returns
+       _____________
+       train,test,validation split and the corresponding indices
+       
+       Example
+       _____________
+
+       chromosomes=[['chr7','chr8'],['chr1','chr2']]
+       chromosome_split=["valid","test"]
+       
+       will produce the following mapping:
+       {'valid': ['chr7', 'chr8'], 'test': ['chr1', 'chr2']}
+
+
+
+
+    """
+    # extracts chromosome from each peak
+    chrs=[x.split(":")[0] for x in names]
+
+    # mapping chromosomes to split:
+    chr_split_map=dict(zip(chromosome_split,chromosomes))
+
+    # iterate through to find hits: generates a list of indices for chromosomes to go into split loc
+    # pull user-input keys:
+    mapping_keys=list(mapping.keys())
+    valid_key=[x for x in mapping_keys if 'v' in x]
+    test_key=[x for x in mapping_keys if x != valid_key]
+
+    valid_index=[]
+    for i in chr_split_map[valid_key]:
+      valid_index.extend([x for x in range(len(chrs)) if chrs[x] == i])
+
+    test_index=[]
+    for i in chr_split_map[test_key]:
+      test_index.extend([x for x in range(len(chrs)) if chrs[x] == i])
+
+    
+
+    valid_frac=len(valid_index)/len(one_hot)
+    test_frac=len(test_index)/len(one_hot)
+
+    num_data = len(one_hot)
+
+    # remaining indices go to train:
+    train_frac = 1 - valid_frac - test_frac
+
+    # produce shuffled list of all indices for downstream pruning:
+    shuffle = np.random.permutation(num_data)
+
+    # defining set of indices not in train:
+    non_train_idx=valid_index;non_train.extend(test_index)
+
+    # removing test/valid indices from shuffled data to produce train:
+    train_index=[x for x in shuffle if x not in non_train_idx]
+
+    
+
+        
+    # split dataset
+    train = (one_hot[train_index], labels[train_index, :])
+    valid = (one_hot[valid_index], labels[valid_index, :])
+    test = (one_hot[test_index], labels[test_index, :])
+    indices = [train_index, valid_index, test_index]
+
+    return train, valid, test, indices
 
 # TODO: function to generate fasta file
 
