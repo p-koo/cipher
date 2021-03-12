@@ -2,7 +2,7 @@ import os
 import argparse
 import pandas as pd
 from tensorflow import keras
-from . import load, model_zoo
+from cipher import load, model_zoo
 
 def main(model_name, data_path, args):
         
