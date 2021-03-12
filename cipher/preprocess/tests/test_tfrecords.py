@@ -62,7 +62,7 @@ def test_integration_hdf5_to_tfrecord(tmp_path: pathlib.Path):
         hdf5_path=hdf5_path,
         feature_dataset="/features",
         label_dataset="/labels",
-        tfrecord_path=tfrec_dir / "data_shard-{shard:02d}.tfrec",
+        tfrecord_path=str(tfrec_dir / "data_shard-{shard:02d}.tfrec"),
         feature_dtype="int32",  # use different dtypes to ensure correct behavior
         label_dtype="float32",
         chunksize=1,
