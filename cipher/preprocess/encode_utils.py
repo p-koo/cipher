@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import subprocess 
-from wrangle import filter_encode_metatable, extract_metatable_information
+from .wrangle import filter_encode_metatable, extract_metatable_information
 
 def _download_url(url, outpath=None):
     """
