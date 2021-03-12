@@ -4,45 +4,6 @@ import pandas as pd
 import subprocess
 
 
-def extract_table_information(filtered_table):
-    """Extract filtered ENCODE metatable for columns.
-
-    Parameters
-    ----------
-    filtered_table : <pandas.DataFrame>
-        Filtered ENCODE metatable.
-
-    Returns
-    -------
-    tf_list : <list>
-        List of transcription factors in the ENCODE metatable.
-    cell_type_list : <list>
-        List of cell types in the ENCODE metatable.
-    file_accession_list : <list>
-        List of file acessions in the ENCODE metatable.
-    url_list : <list>
-        List of URLs in the ENCODE metatable.
-    audit_warning_list : <list>
-        List of audit warnings in the ENCODE metatable.
-
-    Example
-    -------
-    >>> tf, cell_type, file_accession, url, audit = extract_table_information(filtered_table)
-    """
-
-    filtered_table = filtered_table[['File accession', 'Biosample term name', 'Experiment target', 'Lab', 'File download URL', 'Audit WARNING']].copy()
-    filtered_table['Experiment target'] = filtered_table['Experiment target'].str.split('-', expand=True)[0]
-
-    index_list = filtered_table.index.tolist()
-    tf_list = filtered_table['Experiment target'].tolist()
-    cell_type_list = filtered_table['Biosample term name'].tolist()
-    file_accession_list = filtered_table['File accession'].tolist()
-    url_list = filtered_table['File download URL'].tolist()
-    audit_warning_list = filtered_table['Audit WARNING'].tolist()
-
-    return tf_list, cell_type_list, file_accession_list, url_list, audit_warning_list
-
-
 
 
 def filter_encode_metatable(file_path, save_filtered_table=True):
@@ -84,6 +45,47 @@ def filter_encode_metatable(file_path, save_filtered_table=True):
         metatable_filtered.to_csv(save_file, sep='\t', index=False)
 
     return metatable_filtered
+
+
+def extract_metatable_information(metatable_filtered):
+    """Extract filtered ENCODE metatable for columns.
+
+    Parameters
+    ----------
+    metatable_filtered : <pandas.DataFrame>
+        Filtered ENCODE metatable.
+
+    Returns
+    -------
+    tf_list : <list>
+        List of transcription factors in the ENCODE metatable.
+    cell_type_list : <list>
+        List of cell types in the ENCODE metatable.
+    file_accession_list : <list>
+        List of file acessions in the ENCODE metatable.
+    url_list : <list>
+        List of URLs in the ENCODE metatable.
+    audit_warning_list : <list>
+        List of audit warnings in the ENCODE metatable.
+
+    Example
+    -------
+    >>> metatable_filtered = filter_encode_metatable(file_path, save_filtered_table=True)
+    >>> tf, cell_type, file_accession, url, audit = extract_table_information(metatable_filtered)
+    """
+
+    metatable_filtered = metatable_filtered[['File accession', 'Biosample term name', 'Experiment target', 'Lab', 'File download URL', 'Audit WARNING']].copy()
+    metatable_filtered['Experiment target'] = metatable_filtered['Experiment target'].str.split('-', expand=True)[0]
+
+    index_list = metatable_filtered.index.tolist()
+    tf_list = metatable_filtered['Experiment target'].tolist()
+    cell_type_list = metatable_filtered['Biosample term name'].tolist()
+    file_accession_list = metatable_filtered['File accession'].tolist()
+    url_list = metatable_filtered['File download URL'].tolist()
+    audit_warning_list = metatable_filtered['Audit WARNING'].tolist()
+
+    return tf_list, cell_type_list, file_accession_list, url_list, audit_warning_list
+
 
 
 def filter_max_length(bed_path, output_path, max_len=1000):
