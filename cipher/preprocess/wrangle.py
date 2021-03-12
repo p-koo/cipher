@@ -75,55 +75,61 @@ def filter_encode_metatable(file_path, save_filtered_table=True):
 
 def extract_metatable_information(metatable_filtered):
     """Extract filtered ENCODE metatable for columns.
-
     Parameters
     ----------
     metatable_filtered : <pandas.DataFrame>
         Filtered ENCODE metatable.
-
     Returns
     -------
-    tf_list : <list>
-        List of transcription factors in the ENCODE metatable.
-    cell_type_list : <list>
-        List of cell types in the ENCODE metatable.
-    file_accession_list : <list>
-        List of file acessions in the ENCODE metatable.
-    url_list : <list>
-        List of URLs in the ENCODE metatable.
-    audit_warning_list : <list>
-        List of audit warnings in the ENCODE metatable.
-
+    res_dict : <dict>
+        A dictionary containing the following key::value pairs:
+            tf_list : <list>
+                List of transcription factors in the ENCODE metatable.
+            cell_type_list : <list>
+                List of cell types in the ENCODE metatable.
+            file_accession_list : <list>
+                List of file acessions in the ENCODE metatable.
+            expt_accession_list : <list>
+                List of experiment accessions in the ENCODE metatable. 
+            url_list : <list>
+                List of URLs in the ENCODE metatable.
+            audit_warning_list : <list>
+                List of audit warnings in the ENCODE metatable.
     Example
     -------
-    >>> metatable_filtered = filter_encode_metatable(
-        file_path, save_filtered_table=True)
-    >>> tf, cell_type, file_accession, url, audit = extract_table_information(
-        metatable_filtered)
+    >>> metatable_filtered = filter_encode_metatable(file_path, save_filtered_table=True)
+    >>> tf, cell_type, file_accession, url, audit = extract_table_information(metatable_filtered)
     """
 
     metatable_filtered = metatable_filtered[
-        [
-            "File accession",
-            "Biosample term name",
-            "Experiment target",
-            "Lab",
-            "File download URL",
-            "Audit WARNING",
-        ]
-    ].copy()
-    metatable_filtered["Experiment target"] = metatable_filtered[
-        "Experiment target"
-    ].str.split("-", expand=True)[0]
+                                    ['File accession', 
+                                     'Experiment accession',
+                                     'Biosample term name',
+                                     'Experiment target', 
+                                     'Lab', 
+                                     'File download URL', 
+                                     'Audit WARNING']
+                                            ].copy()
+    metatable_filtered['Experiment target'] = metatable_filtered['Experiment target'].str.split('-', expand=True)[0]
 
-    # index_list = metatable_filtered.index.tolist()  # TODO: unused variable
-    tf_list = metatable_filtered["Experiment target"].tolist()
-    cell_type_list = metatable_filtered["Biosample term name"].tolist()
-    file_accession_list = metatable_filtered["File accession"].tolist()
-    url_list = metatable_filtered["File download URL"].tolist()
-    audit_warning_list = metatable_filtered["Audit WARNING"].tolist()
+    index_list = metatable_filtered.index.tolist()
+    tf_list = metatable_filtered['Experiment target'].tolist()
+    cell_type_list = metatable_filtered['Biosample term name'].tolist()
+    file_accession_list = metatable_filtered['File accession'].tolist()
+    expt_accession_list = metatable_filtered['Experiment accession'].tolist()
+    url_list = metatable_filtered['File download URL'].tolist()
+    audit_warning_list = metatable_filtered['Audit WARNING'].tolist()
 
-    return tf_list, cell_type_list, file_accession_list, url_list, audit_warning_list
+    res_dict = {
+                'tf_list':tf_list, 
+                'cell_type_list':cell_type_list, 
+                'file_accession_list':file_accession_list,
+                'expt_accession_list':expt_accession_list,
+                'url_list':url_list,
+                'audit_warning_list':audit_warning_list
+                } 
+
+    return res_dict
 
 
 def filter_max_length(bed_path, output_path, max_len=1000):
