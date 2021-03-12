@@ -233,14 +233,14 @@ def parse_fasta(fasta_path):
     # parse sequence and chromosome from fasta file
     num_data = np.round(sum(1 for line in open(fasta_path))/2).astype(int)
     fin = open(fasta_path, "r")
-    name = []
+    named = []
     sequences = []
     for j in range(num_data):
-        name.append(fin.readline()[1:])
+        names.append(fin.readline()[1:])
         line = fin.readline()[:-1].upper()
         sequences.append(line)
     sequences = np.array(sequences)
-    return sequences
+    return sequences, names
 
 
 def convert_one_hot(sequence, alphabet='ACGT'):
@@ -429,9 +429,10 @@ def match_gc(pos_one_hot, neg_one_hot):
                 break         
         match_index.append(index)
 
-    neg_one_hot_filtered = neg_one_hot[neg_index_sorted[match_index]]
+    index = neg_index_sorted[match_index]
+    neg_one_hot_filtered = neg_one_hot[index]
 
-    return neg_one_hot_filtered
+    return neg_one_hot_filtered, index
 
 
 
