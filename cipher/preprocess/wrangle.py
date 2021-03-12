@@ -40,8 +40,8 @@ def filter_max_length(bed_path, output_path, max_len=1000):
     # get peak sizes
     peak_sizes = end - start
     good_index = []
-    for i, seq in enumerate(sequences):
-        if len(seq) < max_len:
+    for i, size in enumerate(peak_sizes):
+        if size < max_len:
             good_index.append(i)
 
     # create dictionary for dataframe with filtered peaks
