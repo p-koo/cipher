@@ -1,11 +1,64 @@
+"""Functions for data wrangling."""
+
+import os
 import numpy as np 
 import pandas as pd
 
-"""Functions for data wrangling."""
 
-# Function to make bed file constant window size
+
+def filter_max_length(bed_path, output_path, max_len=1000):
+    """
+    Function to plot histogram of bed file peak sizes; automatically infers compression from extension and allows for user-input in removing outlier sequence
+
+    Parameters
+    -----------
+    bed_path : <str>
+        Path to bed file.
+    output_path : <int>
+        Path to filtered bed file.
+    max_len: <int>
+        Cutoff for maximum length of peak -- anything above will be filtered out.
+
+    Returns 
+    -----------
+    .bed of the filtered peaks
+
+    Example
+    -----------
+
+    """
+
+    # check if bedfile is compressed
+    if bed_path.split('.')[-1] == "gz" or bed_path.split('.')[-1] == "gzip": compression="gzip"
+
+    # load bed file
+    f = open(bed_path, 'rb')
+    df = pd.read_table(f, header=None, compression=compression)
+    start = df[1].to_numpy()
+    end = df[2].to_numpy()
+
+    # get peak sizes
+    peak_sizes = end - start
+    good_index = []
+    for i, seq in enumerate(sequences):
+        if len(seq) < max_len:
+            good_index.append(i)
+
+    # create dictionary for dataframe with filtered peaks
+    data = {}
+    for i in range(len(df.columns)):
+        data[i] = df[i].to_numpy()[good_index]
+
+    # create new dataframe
+    df_new = pd.DataFrame(data);
+
+    # save dataframe with fixed width window size to a bed file
+    df_new.to_csv(output_path, sep='\t', header=None, index=False)
+
+
+
 def enforce_constant_size(bed_path, output_path, window):
-    """generate a bed file where all peaks have same size centered on original peak
+    """Generate a bed file where all peaks have same size centered on original peak
     
     Parameters
     ----------
@@ -17,11 +70,13 @@ def enforce_constant_size(bed_path, output_path, window):
         window size. 
     window : <int> 
         Size in bps which to clip the peak sequences. 
+
     Returns
-    -------
+    ----------
     None
+
     Example
-    -------
+    ----------
     >>> window = 200
     >>> bed_path = './ENCFF252PLM.bed.gz' 
     >>> output_path = './pos_'+str(window)+'.bed'
@@ -50,7 +105,7 @@ def enforce_constant_size(bed_path, output_path, window):
     start = middle - half_window
     end = middle + half_window
 
-    # filter any negative start positions
+    # create dictionary for dataframe
     data = {}
     for i in range(len(df.columns)):
         data[i] = df[i].to_numpy()
@@ -63,20 +118,111 @@ def enforce_constant_size(bed_path, output_path, window):
     # save dataframe with fixed width window size to a bed file
     df_new.to_csv(output_path, sep='\t', header=None, index=False)
 
+
+
+
+def parse_fasta(fasta_path):
+    """Parse fasta file for sequences. 
+    
+    Parameters
+    ----------
+    fasta_path : <str>
+        path to fasta file
+
+    Returns
+    -------
+    sequences : <numpy.ndarray>
+        The parsed sequences from the input fasta file as a numpy array of sequences. 
+
+    Example
+    -------
+    >>> fasta_file_path = './CTCF_example.fa' 
+    >>> pos_seq = parse_fasta(fasta_file_path)
+    >>> pos_seq
+    array(['TAAGACCCTGTCTCTAAAAAAATTTTAAAAATTAGCCA,
+       'TTTGGTGGGGCAATGCTGTTGTTTATTTCTTCACCACAAACG,
+       'TACTGAACACAACCAATCCTTCAAAAATCAATTCTCAAAATT,
+       ...,
+       'CTTAATAGAGTACAAAAGCAGCCTTGTACCTGTGCTTCTCTC,
+       'CTTCTAGCTATTCAAGCATATGATGTATTTCCTCCGATAATT,
+       'TGTGCTTGTAGTCCCAGCTACTTGGGAGGCTGAGCCCAGGAG,],
+      dtype='<U38')
+    """
+
+    # parse sequence and chromosome from fasta file
+    num_data = np.round(sum(1 for line in open(fasta_path))/2).astype(int)
+    fin = open(fasta_path, "r")
+    sequences = []
+    for j in range(num_data):
+        coord = fin.readline()
+        line = fin.readline()[:-1].upper()
+        sequences.append(line)
+    sequences = np.array(sequences)
+    return sequences
+
+
+def convert_one_hot(sequence, alphabet='ACGT'):
+	"""Convert DNA/RNA sequences to a one-hot representation.
+
+	Parameters
+	----------
+	sequences : <iterable>
+	   A container with the sequences to transform to one-hot representation. 
+	max_length : <int> 
+	   The maximum allowable length of the sequences. If the sequences argument 
+	   contains variable length sequences, all sequences will be set to length `max_length`.
+	   Longer sequences are trimmed and shorter sequences are zero-padded. 
+	   default: None
+	dtype : <dtype>
+	   The datatype of the 
+
+	Returns
+	-------
+	one_hot_seq : <numpy.ndarray>
+	A numpy tensor of shape (len(sequences), max_length, A)
+	Example
+	-------
+	>>> sequences = ['AGCAC', 'AGCGA']
+	>>> convert_one_hot(sequences)
+	[[[1. 0. 0. 0.]
+	[0. 0. 1. 0.]
+	[0. 1. 0. 0.]
+	[1. 0. 0. 0.]
+	[0. 1. 0. 0.]]
+	[[1. 0. 0. 0.]
+	[0. 0. 1. 0.]
+	[0. 1. 0. 0.]
+	[0. 0. 1. 0.]
+	[1. 0. 0. 0.]]]
+	"""
+
+    # create alphabet dictionary
+    alphabet_dict = {a: i for i, a in enumerate(list(alphabet))}
+
+    # convert sequences to one-hot
+	one_hot = np.zeros((len(sequences),len(sequences[0]),len(alphabet)))
+	for n, seq in enumerate(sequence):
+        for l, s in enumerate(seq):
+            one_hot[n,l,alphabet_dict[s]] = 1.
+    return one_hot
+
+
 def convert_onehot_to_sequence(one_hot, alphabet='ACGT'):
-    """convert DNA/RNA sequences from one-hot representation to 
+    """Convert DNA/RNA sequences from one-hot representation to 
     string representation.
 
     Parameters
     ----------
     one_hot : <numpy.ndarray>
-
+        one_hot encoded sequence with shape (N, L, A)
     alphabet : <str>
+        DNA = 'ACGT'
 
     Returns
     -------
     sequences : <numpy.ndarray>
     A numpy vector of sequences in string representation. 
+
     Example
     -------
     >>> one_hot = np.array(
@@ -99,130 +245,38 @@ def convert_onehot_to_sequence(one_hot, alphabet='ACGT'):
     """
     assert alphabet in ['ACGT', 'ACGU'], 'Enter a valid alphabet'
 
-    alphabet = list(alphabet)
-    idx_to_alphabet = {i:a for i, a in enumerate(alphabet)}
-    seqidxs = np.argmax(one_hot, axis=2)  # (N, L)
+    # convert alphabet to dictionary
+    alphabet_dict = {i: a for i, a in enumerate(list(alphabet))}
+
+    # get indices of one-hot
+    seq_indices = np.argmax(one_hot, axis=2)  # (N, L)
+
+    # convert index to sequence 
     sequences = []
-    for seqidx in seqidxs:
-        seq = pd.Series(seqidx).map(idx_to_alphabet)
+    for seq_index in seq_indices:
+        seq = pd.Series(seq_index).map(alphabet_dict)
         sequences.append(seq)
-    sequences = np.array(sequences)
     return sequences
 
-# Function to convert sequence to one-hot
-def convert_one_hot(sequence, max_length=None, dtype=np.float32):
-	"""convert DNA/RNA sequences to a one-hot representation
-	Parameters
-	----------
-	sequences : <iterable>
-	A container with the sequences to transform to one-hot representation. 
-	max_length : <int> 
-	The maximum allowable length of the sequences. If the sequences argument 
-	contains variable length sequences, all sequences will be set to length `max_length`.
-	Longer sequences are trimmed and shorter sequences are zero-padded. 
-	default: None
-	dtype : <dtype>
-	The datatype of the 
-	Returns
-	-------
-	one_hot_seq : <numpy.ndarray>
-	A numpy tensor of shape (len(sequences), max_length, A)
-	Example
-	-------
-	>>> sequences = ['AGCAC', 'AGCGA']
-	>>> convert_one_hot(sequences)
-	[[[1. 0. 0. 0.]
-	[0. 0. 1. 0.]
-	[0. 1. 0. 0.]
-	[1. 0. 0. 0.]
-	[0. 1. 0. 0.]]
-	[[1. 0. 0. 0.]
-	[0. 0. 1. 0.]
-	[0. 1. 0. 0.]
-	[0. 0. 1. 0.]
-	[1. 0. 0. 0.]]]
-	"""
 
-	one_hot_seq = []
-	for seq in sequence:
-		seq = seq.upper()
-		seq_length = len(seq)
-		one_hot = np.zeros((4,seq_length))
-		index = [j for j in range(seq_length) if seq[j] == 'A']
-		one_hot[0,index] = 1
-		index = [j for j in range(seq_length) if seq[j] == 'C']
-		one_hot[1,index] = 1
-		index = [j for j in range(seq_length) if seq[j] == 'G']
-		one_hot[2,index] = 1
-		index = [j for j in range(seq_length) if (seq[j] == 'U') | (seq[j] == 'T')]
-		one_hot[3,index] = 1
 
-		# handle boundary conditions with zero-padding
-		if max_length:
-			offset1 = int((max_length - seq_length)/2)
-			offset2 = max_length - seq_length - offset1
 
-		if offset1:
-			one_hot = np.hstack([np.zeros((4,offset1)), one_hot])
-		if offset2:
-			one_hot = np.hstack([one_hot, np.zeros((4,offset2))])
-		one_hot_seq.append(one_hot)
 
-	# convert to numpy array
-	one_hot_seq = np.array(one_hot_seq)
-	one_hot_seq = np.transpose(one_hot_seq, (0, 2, 1))
-
-	return one_hot_seq
-
-# Function to parse fasta file of sequences 
-def parse_fasta(seq_path):
-    """Parse fasta file for sequences. 
-    Parameters
-    ----------
-    seq_path : <str>
-    Returns
-    -------
-    sequences : <numpy.ndarray>
-        The parsed sequences from the input fasta file as a numpy array of sequences. 
-    Example
-    -------
-    >>> fasta_file_path = './CTCF_example.fa' 
-    >>> pos_seq = parse_fasta(fasta_file_path)
-    >>> pos_seq
-    array(['TAAGACCCTGTCTCTAAAAAAATTTTAAAAATTAGCCA,
-       'TTTGGTGGGGCAATGCTGTTGTTTATTTCTTCACCACAAACG,
-       'TACTGAACACAACCAATCCTTCAAAAATCAATTCTCAAAATT,
-       ...,
-       'CTTAATAGAGTACAAAAGCAGCCTTGTACCTGTGCTTCTCTC,
-       'CTTCTAGCTATTCAAGCATATGATGTATTTCCTCCGATAATT,
-       'TGTGCTTGTAGTCCCAGCTACTTGGGAGGCTGAGCCCAGGAG,],
-      dtype='<U38')
-    """
-
-    # parse sequence and chromosome from fasta file
-    num_data = np.round(sum(1 for line in open(seq_path))/2).astype(int)
-    fin = open(seq_path, "r")
-    sequences = []
-    for j in range(num_data):
-        coord = fin.readline()
-        line = fin.readline()[:-1].upper()
-        sequences.append(line)
-    sequences = np.array(sequences)
-    return sequences
-
-# Function filter out nonsense sequences. 
 def filter_nonsense_sequences(sequences):
-    """Parse fasta file for sequences
+    """Filter sequences with N.
+
     Parameters
     ----------
-    seq_path : <numpy.ndarray> 
-    A numpy vector of sequence strings. 
+    sequences : <numpy.ndarray> 
+        A numpy vector of sequence strings. 
+    
     Returns
     -------
     filter_sequences : <numpy.ndarray>
-    The parsed sequences from the input fasta file as a numpy array of sequences. 
+        The parsed sequences from the input fasta file as a numpy array of sequences. 
     good_index : <numpy.ndarray>
-    A numpy array of indices corresponding to sequences without nonsense 'N' entries. 
+        A numpy array of indices corresponding to sequences without nonsense 'N' entries. 
+    
     Example
     -------
     >>> print(sequences)
@@ -230,28 +284,26 @@ def filter_nonsense_sequences(sequences):
     'NNCNNCANCNACNGGGGAAC' 'GCCTAGTCCAGACATAATTC']
     >>> print(filter_nonsense_sequences(sequences))
     (array(['GGCTGAAATGGCCACTGGAA', 'ACGCTCTCTCATCAAGTGGT',
-       'GCAGAANANCGAACACCAAC', 'NNCNNCANCNACNGGGGAAC',
-       'GCCTAGTCCAGACATAATTC'], dtype='<U20'), array([0, 1, 4]))
+            'GCCTAGTCCAGACATAATTC'], dtype='<U20'), array([0, 1, 4]))
     """
 
-    # parse sequence and chromosome from fasta file
+    # filter sequences if contains at least one 'N' character
     good_index = []
     filter_sequences = []
-
     for i, seq in enumerate(sequences):
         if 'N' not in seq.upper():
             good_index.append(i)
-        filter_sequences.append(seq)
+            filter_sequences.append(seq)
+    return np.array(filter_sequences), np.array(good_index)
 
-    filter_sequences = np.array(filter_sequences)
-    good_index = np.array(good_index)
-    return filter_sequences, good_index
 
-# GC match between positive and negative labels
+
+
 def match_gc(pos_one_hot, neg_one_hot):
 	"""Given a set of one hot encoded positive and negative 
 	sequences for TF binding, discard negative sequences that 
 	do not the GC content in the set of positive sequences. 
+
 	Parameters
 	----------
 	pos_one_hot : <numpy.ndarray>
@@ -259,17 +311,17 @@ def match_gc(pos_one_hot, neg_one_hot):
 		
 	neg_one_hot : <numpy.ndarray>
 		One hot encoding of the negative sequences. 
-	Returns
+	
+    Returns
 	-------
 	neg_one_hot_filtered : <numpy.ndarray>
 		Numpy matrix of one hot encoded negative sequences 
 		that match gc content profile of positive sequences. 
-	Example
+	
+    Example
 	-------
 	TODO. 
 	"""
-
-
 
 	# nucleotide frequency matched background
 	f_pos = np.mean(pos_one_hot, axis=2)
@@ -299,8 +351,96 @@ def match_gc(pos_one_hot, neg_one_hot):
 
 	return neg_one_hot_filtered
 
-# TODO: Function to convert one-hot to sequence
 
+
+def bedtools_getfasta(bed_path, genome_path, output_path, strand=True, exe_call="bedtools"):
+    """Extract DNA sequences from a fasta file based on feature coordinates.
+    Wrapper around `bedtools getfasta`. This function was made to
+    work with bedtools version 2.27.1. It is not guaranteed to work
+    with other versions. It is not even guaranteed to work with version 2.27.1, but
+    it could and probably will.
+
+    Parameters
+    ----------
+    genome_path : str, Path-like
+        path to reference genome in fasta format.
+    output_path : str, Path-like
+        Output FASTA file.
+    bed_path : str, Path-like
+        BED/GFF/VCF file of ranges to extract from `input_fasta`.
+    strand : bool
+        Force strandedness. If the feature occupies the antisense
+        strand, the squence will be reverse complemented.
+    exe_call : Path-like
+        The path to the `bedtools` executable. By default, uses `bedtools` in `$PATH`.
+    
+    Returns
+    -------
+    Instance of `subprocess.CompletedProcess`.
+    """
+    args = [str(exe_call), "getfasta"]
+    if strand:
+        args.append("-s")
+    args.extend(["-fi", str(genome_path), "-bed", str(bed_path), "-fo", str(output_path)])
+    try:
+        return subprocess.run(args, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as e:
+        raise subprocess.SubprocessError(e.stderr.decode()) from e
+
+
+def bedtools_nonintersect(bed_path, bed_path2, output_bed_path, exe_call="bedtools"):
+    """
+    Gets non-overlap between dnase .bed file and tf .bed file.
+
+    Parameters
+    ----------
+    bed_path : <str>
+        base bed path
+    bed_path2 : <str>
+        bed path to compare against
+    output_bed_path : <str>
+        output path to non-intersected peaks
+    
+    Returns
+    -------
+    .bed file with no overlap with dnase .bed file in output_bed_path loc
+    """ 
+    # cmd = ['bedtools', 'intersect', '-v', '-wa', '-a', bed_path, '-b', bed_path2, '>', output_bed_path]
+    os.system(exe_call+' intersect -v -wa -a '+bed_path+' -b '+bed_path2+' > '+output_bed_path)
+
+
+
+def split_dataset(one_hot, labels, valid_frac=0.1, test_frac=0.2):
+    """split dataset into training, cross-validation, and test set"""
+
+    def split_index(num_data, valid_frac, test_frac):
+        # split training, cross-validation, and test sets
+
+        train_frac = 1 - valid_frac - test_frac
+        cum_index = np.array(np.cumsum([0, train_frac, valid_frac, test_frac])*num_data).astype(int)
+        shuffle = np.random.permutation(num_data)
+        train_index = shuffle[cum_index[0]:cum_index[1]]
+        valid_index = shuffle[cum_index[1]:cum_index[2]]
+        test_index = shuffle[cum_index[2]:cum_index[3]]
+
+        return train_index, valid_index, test_index
+
+
+    # split training, cross-validation, and test sets
+    num_data = len(one_hot)
+    train_index, valid_index, test_index = split_index(num_data, valid_frac, test_frac)
+
+    # split dataset
+    train = (one_hot[train_index], labels[train_index,:])
+    valid = (one_hot[valid_index], labels[valid_index,:])
+    test = (one_hot[test_index], labels[test_index,:])
+    indices = [train_index, valid_index, test_index]
+
+    return train, valid, test, indices
+
+
+
+# TODO: split according to chromosome
 
 # TODO: function to generate fasta file
 
@@ -308,16 +448,8 @@ def match_gc(pos_one_hot, neg_one_hot):
 
 # TODO: function to save dataframe to a bed file
 
-# TODO: Function to calculate GC-content
-
-# TODO: bedtools getfasta
-
-# TODO: bedtools non overlap
-
-# TODO: bedtools overlap
-
-# TODO: random split into train test valid
-
 # TODO: random split into k-fold cross validation
 
-# TODO: split according to chromosome
+
+
+
