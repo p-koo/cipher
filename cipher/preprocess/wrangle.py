@@ -218,11 +218,12 @@ def enforce_constant_size(bed_path, output_path, window):
 
     # calculate center point and create dataframe
     middle = np.round((start + end) / 2).astype(int)
-    half_window = np.round(window / 2).astype(int)
-
+    left_window = np.round(window / 2).astype(int)
+    right_window = window - left_window
+    
     # calculate new start and end points
-    start = middle - half_window
-    end = middle + half_window
+    start = middle - left_window
+    end = middle + right_window
 
     # create dictionary for dataframe
     data = {}
@@ -535,7 +536,7 @@ def sample_b_matched_to_a(
 
 
 def bedtools_getfasta(
-    bed_path, genome_path, output_path, strand=True, exe_call="bedtools"
+    bed_path, genome_path, output_path, strand=True, bedtools_exe="bedtools"
 ):
     """Extract DNA sequences from a fasta file based on feature coordinates.
     Wrapper around `bedtools getfasta`. This function was made to
@@ -561,7 +562,7 @@ def bedtools_getfasta(
     -------
     Instance of `subprocess.CompletedProcess`.
     """
-    args = [str(exe_call), "getfasta"]
+    args = [str(bedtools_exe), "getfasta"]
     if strand:
         args.append("-s")
     args.extend(
@@ -579,9 +580,9 @@ def bedtools_intersect(
     a: PathType,
     b: PathType,
     *,
-    output_bedfile: PathType,
-    write_a=False,
-    invert_match=False,
+    output_path: PathType,
+    write_a=True,
+    nonoverlap=False,
     bedtools_exe: PathType = "bedtools",
 ) -> subprocess.CompletedProcess:
     """Report overlaps between two feature files.
@@ -610,11 +611,11 @@ def bedtools_intersect(
     args = [str(bedtools_exe), "intersect"]
     if write_a:
         args.append("-wa")
-    if invert_match:
+    if nonoverlap:
         args.append("-v")
     args.extend(["-a", str(a), "-b", str(b)])
 
-    output_bedfile = pathlib.Path(output_bedfile)
+    output_bedfile = pathlib.Path(output_path)
     gzipped_output = output_bedfile.suffix == ".gz"
     openfile = gzip.open if gzipped_output else io.open
     try:
@@ -627,7 +628,7 @@ def bedtools_intersect(
             raise subprocess.SubprocessError(
                 f"empty stdout, aborting. stderr is {process.stderr.decode()}"
             )
-        with openfile(output_bedfile, mode="wb") as f:  # type: ignore
+        with openfile(output_path, mode="wb") as f:  # type: ignore
             f.write(process.stdout)
         return process
     except subprocess.CalledProcessError as e:
