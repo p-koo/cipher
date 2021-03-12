@@ -10,6 +10,7 @@ import typing
 import numpy as np
 import pandas as pd
 import scipy.stats
+from ushuffle import shuffle
 
 PathType = typing.Union[str, pathlib.Path]
 
@@ -725,6 +726,117 @@ def split_dataset_by_chr(one_hot, labels, names, chromosome_test,chromosome_vali
     indices = [train_index, valid_index, test_index]
 
     return train, valid, test, indices
+
+
+def shuffle_onehot(one_hot, k=1):
+    """Shuffle one-hot represented sequences while preserving k-let frequencies.
+    
+    Parameters
+    ----------
+    one_hot : numpy.ndarray
+        One_hot encoded sequence with shape (N, L, A)
+    k : int
+        k of k-let frequencies to preserve (e.g., with k = 2, dinucleotide
+        shuffle is performed); default is k = 1 (i.e., single-nucleotide
+        shuffle)
+
+    Returns
+    -------
+    Numpy array of one-hot represented shuffled sequences, of the same shape
+    as one_hot.
+
+    Examples
+    --------
+    >>> seqs = ["ACGT", "GTCA"]
+    >>> one_hot = convert_one_hot(seqs)
+    >>> one_hot
+    array([[[1., 0., 0., 0.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [0., 0., 0., 1.]],
+
+           [[0., 0., 1., 0.],
+            [0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [1., 0., 0., 0.]]])
+    >>> one_hot_shuffled = shuffle_onehot(one_hot)
+    >>> one_hot_shuffled
+    array([[[0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [1., 0., 0., 0.],
+            [0., 0., 1., 0.]],
+
+           [[1., 0., 0., 0.],
+            [0., 0., 1., 0.],
+            [0., 1., 0., 0.],
+            [0., 0., 0., 1.]]])
+    """
+    
+    if k == 1:
+        L = one_hot.shape[1] # one_hot has shape (N, L, A)
+        rng = np.random.default_rng()
+        one_hot_shuffled = []
+
+        for x in one_hot:
+            perm = rng.permutation(L)
+            x_shuffled = x[perm, :]
+            one_hot_shuffled.append(x_shuffled)
+
+        one_hot_shuffled = np.array(one_hot_shuffled)
+
+        return one_hot_shuffled
+    
+    elif k >= 2:
+        seqs = [seq.str.cat() for seq in convert_onehot_to_sequence(one_hot)] # convert one_hot to pandas Series of letters, then string letters together (for each Series)
+        seqs_shuffled = []
+    
+        for i, seq in enumerate(seqs):
+            seq = seq.upper()
+            seq_shuffled = shuffle( bytes(seq, "utf-8") , k).decode("utf-8") # dinucleotide shuffle
+
+            seqs_shuffled.append(seq_shuffled)
+
+        one_hot_shuffled = convert_one_hot(seqs_shuffled)
+        return one_hot_shuffled
+    
+    else:
+        raise ValueError("k must be an integer greater than or equal to 1")
+
+        
+def shuffle_sequences(sequences, k=1):
+    """Shuffle one-hot represented sequences while preserving k-let frequencies.
+    
+    Parameters
+    ----------
+    one_hot : numpy.ndarray
+        One_hot encoded sequence with shape (N, L, A)
+    k : int
+        k of k-let frequencies to preserve (e.g., with k = 2, dinucleotide
+        shuffle is performed); default is k = 1 (i.e., single-nucleotide
+        shuffle)
+
+    Returns
+    -------
+    Numpy array of one-hot represented shuffled sequences, of the same shape
+    as one_hot.
+
+    Examples
+    --------
+    >>> seqs = ["AGCGTTCAA", "TACGAATCG"]
+    >>> seqs_shuffled = shuffle_sequences(seqs, k=2) # dinucleotide shuffle
+    >>> seqs_shuffled
+    ['AAGTTCGCA', 'TCGATAACG']
+    """
+    sequences_shuffled = []
+
+    for i, seq in enumerate(sequences):
+        seq = seq.upper()
+        seq_shuffled = shuffle( bytes(seq, "utf-8") , k).decode("utf-8")
+
+        sequences_shuffled.append(seq_shuffled)
+
+    return sequences_shuffled
+
 
 # TODO: function to generate fasta file
 
