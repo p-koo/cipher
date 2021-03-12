@@ -161,51 +161,50 @@ def parse_fasta(fasta_path):
     return sequences
 
 
+def convert_one_hot(sequence, alphabet='ACGT'):
+    """Convert DNA/RNA sequences to a one-hot representation.
 
-def convert_one_hot(sequences, alphabet="ACGT") -> np.ndarray:
-    """Convert flat array of sequences to one-hot representation.
-    Assumes that all sequences have the same length and that all letters in `sequences`
-    are contained in `alphabet`.
     Parameters
     ----------
-    sequences : numpy.ndarray of strings
-        The array of strings. Should be one-dimensional.
-    alphabet : str
-        The alphabet of the sequences.
+    sequences : <iterable>
+       A container with the sequences to transform to one-hot representation. 
+    max_length : <int> 
+       The maximum allowable length of the sequences. If the sequences argument 
+       contains variable length sequences, all sequences will be set to length `max_length`.
+       Longer sequences are trimmed and shorter sequences are zero-padded. 
+       default: None
+    dtype : <dtype>
+       The datatype of the 
+
     Returns
     -------
-    Numpy array of sequences in one-hot representation. The shape of this array is
-    `(len(sequences), len(sequences[0]), len(alphabet))`.
-    Examples
-    --------
-    >>> one_hot(["TGCA"], alphabet="ACGT")
-    array([[[0., 0., 0., 1.],
-            [0., 0., 1., 0.],
-            [0., 1., 0., 0.],
-            [1., 0., 0., 0.]]])
+    one_hot_seq : <numpy.ndarray>
+    A numpy tensor of shape (len(sequences), max_length, A)
+    Example
+    -------
+    >>> sequences = ['AGCAC', 'AGCGA']
+    >>> convert_one_hot(sequences)
+    [[[1. 0. 0. 0.]
+    [0. 0. 1. 0.]
+    [0. 1. 0. 0.]
+    [1. 0. 0. 0.]
+    [0. 1. 0. 0.]]
+    [[1. 0. 0. 0.]
+    [0. 0. 1. 0.]
+    [0. 1. 0. 0.]
+    [0. 0. 1. 0.]
+    [1. 0. 0. 0.]]]
     """
-    sequences = np.asanyarray(sequences)
-    if sequences.ndim != 1:
-        raise ValueError("array of sequences must be one-dimensional.")
-    n_sequences = sequences.shape[0]
-    sequence_len = len(sequences[0])
 
-    # Unpack strings into 2D array, where each point has one character.
-    s = np.zeros((n_sequences, sequence_len), dtype="U1")
-    for i in range(n_sequences):
-        s[i] = list(sequences[i])
+    # create alphabet dictionary
+    alphabet_dict = {a: i for i, a in enumerate(list(alphabet))}
 
-    # Make an integer array from the string array.
-    pre_onehot = np.zeros(s.shape, dtype=np.uint8)
-    for i, letter in enumerate(alphabet):
-        # do nothing on 0 because array is initialized with zeros.
-        if i:
-            pre_onehot[s == letter] = i
-
-    # create one-hot representation
-    n_classes = len(alphabet)
-    return np.eye(n_classes)[pre_onehot]
-
+    # convert sequences to one-hot
+    one_hot = np.zeros((len(sequences),len(sequences[0]),len(alphabet)))
+    for n, seq in enumerate(sequence):
+        for l, s in enumerate(seq):
+            one_hot[n,l,alphabet_dict[s]] = 1.
+    return one_hot
 
 
 def convert_onehot_to_sequence(one_hot, alphabet='ACGT'):
