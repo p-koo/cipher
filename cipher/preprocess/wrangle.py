@@ -671,6 +671,65 @@ def split_dataset(one_hot, labels, valid_frac=0.1, test_frac=0.2):
 
 
 # TODO: split according to chromosome
+def split_dataset_by_chr(one_hot, labels, names, chromosome_test,chromosome_valid):
+    """takes list of chromosomes and which split to put them in
+       takes names of peaks and extracts chromosomes
+       
+       Parameters
+       ____________
+       one_hot : < array of one_hot encoded sequences >
+       labels : < array indicating class membership of corresponding sample >
+       names : < array of sequence chromosomal coordinates 
+       chromosome_test : < list of chromosomes to be put in test >
+       chromosome_valid : < list of chromosomes to be put in val > 
+
+       Returns
+       _____________
+       train,test,validation split and the corresponding indices
+       
+       Example
+       _____________
+
+       
+
+
+
+    """
+    # extracts chromosome from each peak
+    chrs=[x.split(":")[0] for x in names]
+
+    
+    valid_index=[]
+    for i in chromosome_valid:
+      valid_index.extend([x for x in range(len(chrs)) if chrs[x] == i])
+
+    test_index=[]
+    for i in chromosome_test:
+      test_index.extend([x for x in range(len(chrs)) if chrs[x] == i])
+
+    
+
+    
+    num_data = len(one_hot)
+
+    # produce shuffled list of all indices for downstream pruning:
+    shuffle = np.random.permutation(num_data);shuffle=set(shuffle)
+
+    # defining set of indices not in train:
+    non_train_idx=valid_index;non_train_idx.extend(test_index);non_train_idx=set(non_train_idx)
+
+    # removing test/valid indices from shuffled data to produce train:
+    # takes values in shuffle not in non_train_idx
+
+    train_index=list(shuffle ^ non_train_idx)
+        
+    # split dataset
+    train = (one_hot[train_index], labels[train_index, :])
+    valid = (one_hot[valid_index], labels[valid_index, :])
+    test = (one_hot[test_index], labels[test_index, :])
+    indices = [train_index, valid_index, test_index]
+
+    return train, valid, test, indices
 
 # TODO: function to generate fasta file
 
