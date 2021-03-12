@@ -10,3 +10,4 @@ from . import model_zoo
 from . import preprocess
 from . import train
 from . import utils
+from . import process_singletask
