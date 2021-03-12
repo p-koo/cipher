@@ -10,7 +10,7 @@ def main(model_name, data_path, args):
     x_train, y_train, x_valid, y_valid, x_test, y_test = load.standard_data(data_path, reverse_comp=args.rc)
     
     # Import model from the zoo as singular animal
-    animal = __import__("model_zoo." + model_name, globals(), locals(), [model_name], 0) # equivalent of `from model_zoo import model_name as animal` where model_name is evaluated at runtime
+    animal = __import__("cipher.model_zoo." + model_name, globals(), locals(), [model_name], 0) # equivalent of `from model_zoo import model_name as animal` where model_name is evaluated at runtime
 
     # Build model
     num_labels = y_train.shape[1]
