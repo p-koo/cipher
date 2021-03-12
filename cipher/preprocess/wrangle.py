@@ -42,14 +42,66 @@ def extract_table_information(filtered_table):
 
     return tf_list, cell_type_list, file_accession_list, url_list, audit_warning_list
 
-    Returns 
-    -----------
-    .bed of the filtered peaks
 
+
+
+def filter_encode_metatable(file_path, save_filtered_table=True):
+    """Filter ENCODE metatable for relevant rows.
+
+    Parameters
+    ----------
+    file_path : <str>
+        Path to ENCODE metatable file in TSV format.
+    save_filtered_table : <bool>, optional
+        Optional flag denoting whether filtered table should be saved in same directory as original metatable.
+
+    Returns
+    -------
+    metatable_filtered : <pandas.DataFrame>
+        Filtered ENCODE metatable.
 
     Example
-    -----------
+    -------
+    >>> metatable_path = "./k562.tsv"
+    >>> metatable_filtered = filter_encode_metatable(metatable_path)
+    """
 
+    metatable = pd.read_csv(file_path, sep='\t')
+    metatable_filtered = pd.DataFrame(columns=metatable.columns) # make empty DataFrame to hold all desired datasets
+
+    for accession in metatable["Experiment accession"].unique():
+        criterion = (metatable["Experiment accession"] == accession) & \
+        (metatable["Output type"] == "IDR thresholded peaks") & \
+        (metatable["File assembly"] == "GRCh38") & \
+        (metatable["Biological replicate(s)"] == "1, 2")
+
+        metatable_filtered = pd.concat( [metatable_filtered, metatable[criterion]] ) # add filtered metatable (i.e., metatable[criterion]) to datasets
+
+    if save_filtered_table:
+        save_path, _ = os.path.split(file_path)
+        file_name = os.path.splitext(file_path)[0]
+        save_file = os.path.join(save_path, file_name + "_filtered.tsv")
+        metatable_filtered.to_csv(save_file, sep='\t', index=False)
+
+    return metatable_filtered
+
+
+def filter_max_length(bed_path, output_path, max_len=1000):
+    """
+    Function to plot histogram of bed file peak sizes; automatically infers compression from extension and allows for user-input in removing outlier sequence
+
+    Parameters
+    -----------
+    bed_path : <str>
+        Path to bed file.
+    output_path : <int>
+        Path to filtered bed file.
+    max_len: <int>
+        Cutoff for maximum length of peak -- anything above will be filtered out.
+
+    Returns
+    ----------
+    None
     """
 
     # check if bedfile is compressed
@@ -146,60 +198,6 @@ def enforce_constant_size(bed_path, output_path, window):
     # save dataframe with fixed width window size to a bed file
     df_new.to_csv(output_path, sep='\t', header=None, index=False)
 
-
-def filter_max_length(bed_path, output_path, max_len=1000):
-    """
-    Function to plot histogram of bed file peak sizes; automatically infers compression from extension and allows for user-input in removing outlier sequence
-
-    Parameters
-    -----------
-    bed_path : <str>
-        Path to bed file.
-    output_path : <int>
-        Path to filtered bed file.
-    max_len: <int>
-        Cutoff for maximum length of peak -- anything above will be filtered out.
-
-
-def filter_encode_metatable(file_path, save_filtered_table=True):
-    """Filter ENCODE metatable for relevant rows.
-
-    Parameters
-    ----------
-    file_path : <str>
-        Path to ENCODE metatable file in TSV format.
-    save_filtered_table : <bool>, optional
-        Optional flag denoting whether filtered table should be saved in same directory as original metatable.
-
-    Returns
-    -------
-    metatable_filtered : <pandas.DataFrame>
-        Filtered ENCODE metatable.
-
-    Example
-    -------
-    >>> metatable_path = "./k562.tsv"
-    >>> metatable_filtered = filter_encode_metatable(metatable_path)
-    """
-
-    metatable = pd.read_csv(file_path, sep='\t')
-    metatable_filtered = pd.DataFrame(columns=metatable.columns) # make empty DataFrame to hold all desired datasets
-
-    for accession in metatable["Experiment accession"].unique():
-        criterion = (metatable["Experiment accession"] == accession) & \
-        (metatable["Output type"] == "IDR thresholded peaks") & \
-        (metatable["File assembly"] == "GRCh38") & \
-        (metatable["Biological replicate(s)"] == "1, 2")
-
-        metatable_filtered = pd.concat( [metatable_filtered, metatable[criterion]] ) # add filtered metatable (i.e., metatable[criterion]) to datasets
-
-    if save_filtered_table:
-        save_path, _ = os.path.split(file_path)
-        file_name = os.path.splitext(file_path)[0]
-        save_file = os.path.join(save_path, file_name + "_filtered.tsv")
-        metatable_filtered.to_csv(save_file, sep='\t', index=False)
-
-    return metatable_filtered
 
 
 def parse_fasta(fasta_path):
