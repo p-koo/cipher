@@ -64,11 +64,11 @@ def main(args):
 
     # get non-overlap between pos peaks and neg peaks
     neg_bed_path = os.path.join(data_path, experiment + '_nonoverlap.bed')
-    wrangle.bedtools_intersect(dnase_path, tf_path, neg_bed_path)
+    wrangle.bedtools_nonintersect(dnase_path, tf_path, neg_bed_path)
 
     # create new bed file with window enforced
     neg_bed_path2 = os.path.join(data_path, experiment + '_neg_'+str(window)+'.bed')
-    enforce_constant_size(neg_bed_path, neg_bed_path2, window, compression)
+    wrangle.enforce_constant_size(neg_bed_path, neg_bed_path2, window, compression)
 
     # extract sequences from bed file and save to fasta file
     neg_fasta_path = os.path.join(data_path, experiment + '_neg.fa')
