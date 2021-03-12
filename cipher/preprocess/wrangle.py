@@ -283,7 +283,7 @@ def parse_fasta(filepath: PathType) -> typing.Tuple[np.ndarray, np.ndarray]:
     return np.array(sequences), np.array(descriptions)
 
 
-def one_hot(sequences, alphabet="ACGT") -> np.ndarray:
+def convert_one_hot(sequences, alphabet="ACGT") -> np.ndarray:
     """Convert flat array of sequences to one-hot representation.
 
     This function assumes that all sequences have the same length and that all letters

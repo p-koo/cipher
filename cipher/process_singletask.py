@@ -52,7 +52,7 @@ def main(args):
 
     # extract sequences from bed file and save to fasta file
     pos_fasta_path = os.path.join(data_path, experiment+'_pos.fa')
-    wrangle.bedtools_getfasta(pos_bed_path, genome_path, output_path=pos_fasta_path)
+    wrangle.bedtools_getfasta(pos_bed_path, genome_path, output_path=pos_fasta_path, strand=True)
 
     # parse sequence from fasta file
     pos_seq, pos_names = wrangle.parse_fasta(pos_fasta_path)
@@ -66,7 +66,7 @@ def main(args):
 
     # get non-overlap between pos peaks and neg peaks
     neg_bed_path = os.path.join(data_path, experiment + '_nonoverlap.bed')
-    wrangle.bedtools_nonintersect(dnase_path, tf_path, neg_bed_path)
+    wrangle.bedtools_intersect(dnase_path, tf_path, neg_bed_path, write_a=True, nonoverlap=False)
 
     # create new bed file with window enforced
     neg_bed_path2 = os.path.join(data_path, experiment + '_neg_'+str(window)+'.bed')
@@ -74,7 +74,7 @@ def main(args):
 
     # extract sequences from bed file and save to fasta file
     neg_fasta_path = os.path.join(data_path, experiment + '_neg.fa')
-    wrangle.bedtools_getfasta(neg_bed_path2, genome_path, output_path=neg_fasta_path)
+    wrangle.bedtools_getfasta(neg_bed_path2, genome_path, output_path=neg_fasta_path, strand=True)
 
     # parse sequence and chromosome from fasta file
     neg_seq, neg_names = wrangle.parse_fasta(neg_fasta_path)
@@ -93,11 +93,11 @@ def main(args):
     # merge postive and negative sequences
     one_hot = np.vstack([pos_one_hot, neg_one_hot_gc])
     labels = np.vstack([np.ones((len(pos_one_hot), 1)), np.zeros((len(neg_one_hot_gc), 1))])
-    names = pos_names + neg_names
+    names = np.concatenate([pos_names, neg_names])
 
     # shuffle indices for train, validation, and test sets
     train, valid, test, indices = wrangle.split_dataset(one_hot, labels, valid_frac=valid_frac, test_frac=test_frac)
-    
+
     # save to hdf5 file
     file_path = os.path.join(data_path, experiment+'_'+str(window)+'.h5')
     with h5py.File(file_path, 'w') as fout:
@@ -111,6 +111,7 @@ def main(args):
         y_test  = fout.create_dataset('y_test',  data=test[1],  dtype='int8',    compression="gzip")
         y_test = fout.create_dataset('test_names', data=names[indices[2]], dtype='str', compression="gzip")
     print('Saved to: ' + file_path)
+
 
 
 
