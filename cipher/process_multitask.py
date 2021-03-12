@@ -67,8 +67,8 @@ def main():
                             feature_size=options.feature_size,merge_overlap=options.overlap,
                              out_prefix=options.bed_output)
 
-    subprocess.call('bedtools getfasta -fi {} -s -bed {} -fo {}'.format(options.fasta,options.bed_output,options.fa_output), shell=True)
-    make_h5(options.fasta, options.bed_output+'_act.txt',options.h5_output,options.header_output)
+    subprocess.call('bedtools getfasta -fi {} -s -bed {} -fo {}'.format(options.fasta,options.bed_output+'.bed',options.fa_output), shell=True)
+    make_h5(options.fa_output, options.bed_output+'_act.txt',options.h5_output,options.header_output)
 
 
 if __name__ == "__main__":
