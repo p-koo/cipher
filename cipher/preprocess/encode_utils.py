@@ -62,7 +62,7 @@ def download_cell_line_data(metadata_path, tfchipdir):
 
     """
     # load the meta data file and filter its contents   
-    metatable_filtered = filter_encode_metatable(metatable_path)
+    metatable_filtered = filter_encode_metatable(metadata_path)
     res = extract_metatable_information(metatable_filtered)
     df = pd.DataFrame.from_dict(res)
 
