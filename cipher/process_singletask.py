@@ -81,7 +81,7 @@ def main(args):
 
     # filter sequences with absent nucleotides
     neg_seq, good_index = wrangle.filter_nonsense_sequences(neg_seq)
-    neg_names = neg_names[index]
+    neg_names = neg_names[good_index]
 
     # convert filtered sequences to one-hot representation
     neg_one_hot = wrangle.convert_one_hot(neg_seq, alphabet)
