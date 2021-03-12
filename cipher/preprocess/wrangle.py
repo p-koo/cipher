@@ -145,14 +145,10 @@ def filter_max_length(bed_path, output_path, max_len=1000):
     """
 
     # check if bedfile is compressed
-    if bed_path.split(".")[-1] == "gz" or bed_path.split(".")[-1] == "gzip":
-        compression = "gzip"
-    else:
-        compression = None
+    compression = "gzip" if _is_gzipped(bed_path) else None
 
     # load bed file
-    f = open(bed_path, "rb")
-    df = pd.read_table(f, header=None, compression=compression)
+    df = pd.read_table(bed_path, header=None, sep="\t", compression=compression)
     start = df[1].to_numpy()
     end = df[2].to_numpy()
 
@@ -210,8 +206,7 @@ def enforce_constant_size(bed_path, output_path, window):
         compression = None
 
     # load bed file
-    f = open(bed_path, "rb")
-    df = pd.read_table(f, header=None, compression=compression)
+    df = pd.read_table(bed_path, header=None, sep="\t", compression=compression)
     # chrom = df[0].to_numpy().astype(str)  # TODO: unused variable
     start = df[1].to_numpy()
     end = df[2].to_numpy()
@@ -285,8 +280,8 @@ def parse_fasta(filepath: PathType) -> typing.Tuple[np.ndarray, np.ndarray]:
 def one_hot(sequences, alphabet="ACGT") -> np.ndarray:
     """Convert flat array of sequences to one-hot representation.
 
-    This function assumes that all sequences have the same length and that all letters
-    in `sequences` are contained in `alphabet`.
+    **Important**: all letters in `sequences` *must* be contained in `alphabet`, and
+    all sequences must have the same length.
 
     Parameters
     ----------
@@ -380,7 +375,7 @@ def convert_onehot_to_sequence(one_hot, alphabet="ACGT"):
     for seq_index in seq_indices:
         seq = pd.Series(seq_index).map(alphabet_dict)
         sequences.append(seq)
-    return sequences
+    return np.asarray(sequences)
 
 
 def filter_nonsense_sequences(sequences):
