@@ -29,7 +29,10 @@ def filter_max_length(bed_path, output_path, max_len=1000):
     """
 
     # check if bedfile is compressed
-    if bed_path.split('.')[-1] == "gz" or bed_path.split('.')[-1] == "gzip": compression="gzip"
+    if bed_path.split('.')[-1] == "gz" or bed_path.split('.')[-1] == "gzip": 
+        compression = "gzip"
+    else:
+        compression = None
 
     # load bed file
     f = open(bed_path, 'rb')
@@ -86,8 +89,11 @@ def enforce_constant_size(bed_path, output_path, window):
     assert os.path.exists(bed_path), 'No such bed file.'
 
     # set up the compression argument 
-    if bed_path.split('.')[-1] == "gz" or bed_path.split('.')[-1] == "gzip": compression="gzip"
-    
+    if bed_path.split('.')[-1] == "gz" or bed_path.split('.')[-1] == "gzip": 
+        compression = "gzip"
+    else:
+        compression = None
+
     # load bed file
     f = open(bed_path, 'rb')
     df = pd.read_table(f, header=None, compression=compression)
