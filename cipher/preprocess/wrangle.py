@@ -162,46 +162,46 @@ def parse_fasta(fasta_path):
 
 
 def convert_one_hot(sequence, alphabet='ACGT'):
-	"""Convert DNA/RNA sequences to a one-hot representation.
+    """Convert DNA/RNA sequences to a one-hot representation.
 
-	Parameters
-	----------
-	sequences : <iterable>
-	   A container with the sequences to transform to one-hot representation. 
-	max_length : <int> 
-	   The maximum allowable length of the sequences. If the sequences argument 
-	   contains variable length sequences, all sequences will be set to length `max_length`.
-	   Longer sequences are trimmed and shorter sequences are zero-padded. 
-	   default: None
-	dtype : <dtype>
-	   The datatype of the 
+    Parameters
+    ----------
+    sequences : <iterable>
+       A container with the sequences to transform to one-hot representation. 
+    max_length : <int> 
+       The maximum allowable length of the sequences. If the sequences argument 
+       contains variable length sequences, all sequences will be set to length `max_length`.
+       Longer sequences are trimmed and shorter sequences are zero-padded. 
+       default: None
+    dtype : <dtype>
+       The datatype of the 
 
-	Returns
-	-------
-	one_hot_seq : <numpy.ndarray>
-	A numpy tensor of shape (len(sequences), max_length, A)
-	Example
-	-------
-	>>> sequences = ['AGCAC', 'AGCGA']
-	>>> convert_one_hot(sequences)
-	[[[1. 0. 0. 0.]
-	[0. 0. 1. 0.]
-	[0. 1. 0. 0.]
-	[1. 0. 0. 0.]
-	[0. 1. 0. 0.]]
-	[[1. 0. 0. 0.]
-	[0. 0. 1. 0.]
-	[0. 1. 0. 0.]
-	[0. 0. 1. 0.]
-	[1. 0. 0. 0.]]]
-	"""
+    Returns
+    -------
+    one_hot_seq : <numpy.ndarray>
+    A numpy tensor of shape (len(sequences), max_length, A)
+    Example
+    -------
+    >>> sequences = ['AGCAC', 'AGCGA']
+    >>> convert_one_hot(sequences)
+    [[[1. 0. 0. 0.]
+    [0. 0. 1. 0.]
+    [0. 1. 0. 0.]
+    [1. 0. 0. 0.]
+    [0. 1. 0. 0.]]
+    [[1. 0. 0. 0.]
+    [0. 0. 1. 0.]
+    [0. 1. 0. 0.]
+    [0. 0. 1. 0.]
+    [1. 0. 0. 0.]]]
+    """
 
     # create alphabet dictionary
     alphabet_dict = {a: i for i, a in enumerate(list(alphabet))}
 
     # convert sequences to one-hot
-	one_hot = np.zeros((len(sequences),len(sequences[0]),len(alphabet)))
-	for n, seq in enumerate(sequence):
+    one_hot = np.zeros((len(sequences),len(sequences[0]),len(alphabet)))
+    for n, seq in enumerate(sequence):
         for l, s in enumerate(seq):
             one_hot[n,l,alphabet_dict[s]] = 1.
     return one_hot
@@ -300,56 +300,56 @@ def filter_nonsense_sequences(sequences):
 
 
 def match_gc(pos_one_hot, neg_one_hot):
-	"""Given a set of one hot encoded positive and negative 
-	sequences for TF binding, discard negative sequences that 
-	do not the GC content in the set of positive sequences. 
+    """Given a set of one hot encoded positive and negative 
+    sequences for TF binding, discard negative sequences that 
+    do not the GC content in the set of positive sequences. 
 
-	Parameters
-	----------
-	pos_one_hot : <numpy.ndarray>
-		One hot encoding of the positive sequences.
-		
-	neg_one_hot : <numpy.ndarray>
-		One hot encoding of the negative sequences. 
-	
+    Parameters
+    ----------
+    pos_one_hot : <numpy.ndarray>
+        One hot encoding of the positive sequences.
+        
+    neg_one_hot : <numpy.ndarray>
+        One hot encoding of the negative sequences. 
+    
     Returns
-	-------
-	neg_one_hot_filtered : <numpy.ndarray>
-		Numpy matrix of one hot encoded negative sequences 
-		that match gc content profile of positive sequences. 
-	
+    -------
+    neg_one_hot_filtered : <numpy.ndarray>
+        Numpy matrix of one hot encoded negative sequences 
+        that match gc content profile of positive sequences. 
+    
     Example
-	-------
-	TODO. 
-	"""
+    -------
+    TODO. 
+    """
 
-	# nucleotide frequency matched background
-	f_pos = np.mean(pos_one_hot, axis=2)
-	f_neg = np.mean(neg_one_hot, axis=2)
+    # nucleotide frequency matched background
+    f_pos = np.mean(pos_one_hot, axis=2)
+    f_neg = np.mean(neg_one_hot, axis=2)
 
-	#get GC content for pos and neg sequences
-	gc_pos = np.sum(f_pos[:,1:3], axis=1)
-	gc_neg = np.sum(f_neg[:,1:3], axis=1)
+    #get GC content for pos and neg sequences
+    gc_pos = np.sum(f_pos[:,1:3], axis=1)
+    gc_neg = np.sum(f_neg[:,1:3], axis=1)
 
-	# sort by gc content
-	gc_pos_sorted = np.sort(gc_pos)
-	neg_index_sorted = np.argsort(gc_neg)
-	gc_neg_sorted = np.sort(gc_neg)    
+    # sort by gc content
+    gc_pos_sorted = np.sort(gc_pos)
+    neg_index_sorted = np.argsort(gc_neg)
+    gc_neg_sorted = np.sort(gc_neg)    
 
-	# find nucleotide GC best matches between pos and neg sequences 
-	match_index = []
-	index = 0 
-	for i, gc in enumerate(gc_pos_sorted):
-		while index < len(gc_neg_sorted)-1: 
-			if (abs(gc - gc_neg_sorted[index+1]) <=  abs(gc - gc_neg_sorted[index])):  
-				index += 1
-			else: 
-				break         
-		match_index.append(index)
+    # find nucleotide GC best matches between pos and neg sequences 
+    match_index = []
+    index = 0 
+    for i, gc in enumerate(gc_pos_sorted):
+        while index < len(gc_neg_sorted)-1: 
+            if (abs(gc - gc_neg_sorted[index+1]) <=  abs(gc - gc_neg_sorted[index])):  
+                index += 1
+            else: 
+                break         
+        match_index.append(index)
 
-	neg_one_hot_filtered = neg_one_hot[neg_index_sorted[match_index]]
+    neg_one_hot_filtered = neg_one_hot[neg_index_sorted[match_index]]
 
-	return neg_one_hot_filtered
+    return neg_one_hot_filtered
 
 
 
