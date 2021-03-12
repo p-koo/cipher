@@ -579,7 +579,6 @@ def bedtools_getfasta(
 def bedtools_intersect(
     a: PathType,
     b: PathType,
-    *,
     output_path: PathType,
     write_a=True,
     nonoverlap=False,
