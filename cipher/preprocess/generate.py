@@ -1,7 +1,7 @@
 import os, h5py
 import numpy as np
 import argparse
-from cipher.preprocess import wrangle
+import wrangle
 
 def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment, 
                        window=200, alphabet='ACGT', compression='gzip', max_len=300, 
