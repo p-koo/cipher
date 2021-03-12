@@ -35,8 +35,6 @@ from seq_hdf5 import make_h5
 
 def main():
     parser = OptionParser()
-    parser.add_option('--metadata', dest='metadata_path', help='location for metadata table containing experiment information')
-    parser.add_option('--data_dir', dest='data_dir', help='directory containing corresponding sequencing data files')
     parser.add_option('--feature_size',dest = 'feature_size',default = 1000,help='length of selected sequence regions')
     parser.add_option('--fasta',dest = 'fasta',help='length of selected sequence regions')
     parser.add_option('--output', dest='h5_output', default ='output.h5', help='Directory for output h5 file. Default to current directory')
@@ -51,20 +49,26 @@ def main():
     parser.add_option('--exp_accession_list', dest='exp_accession',default=None, help='List of experiments to select, if empty select all in the metadata table')
     parser.add_option('--merge_overlap',dest = 'overlap',default=200, help='if two peak regions overlaps more than this amount, they will be re-centered and merged into a single sample')
     (options,args) = parser.parse_args()
+    if len(args) != 2:
+        parser.error('Must provide data directory and metadata table path.')
+    else:
+        data_dir = args[0]
+        metadata_path = args[1]
+
 
     #call package functiond
-    create_samplefile(options.data_dir, options.metadata_path, assembly = options.g_assembly,
-                      sample_output_path=options.subset_output,
-                      subset_output_path=options.exp_output,
+    create_samplefile(data_dir, metadata_path, assembly = options.g_assembly,
+                      sample_output_path=options.exp_output,
+                      subset_output_path=options.subset_output,
                       criteria=options.criteria,
                       exp_accession_list=options.exp_accession)
 
-    multitask_bed_generation(exp_output,chrom_lengths_file=options.chrom_size,
+    multitask_bed_generation(options.exp_output,chrom_lengths_file=options.chrom_size,
                             feature_size=options.feature_size,merge_overlap=options.overlap,
                              out_prefix=options.bed_output)
 
-    subprocess.call('bedtools getfasta -fi {} -s -bed {} -fo {}'.format(options.fasta,options.bed_output,options.fasta_output), shell=True)
-    make_h5(options.fasta,bed_output+'_act.txt',options.h5_output,options.header_output)
+    subprocess.call('bedtools getfasta -fi {} -s -bed {} -fo {}'.format(options.fasta,options.bed_output,options.fa_output), shell=True)
+    make_h5(options.fasta, options.bed_output+'_act.txt',options.h5_output,options.header_output)
 
 
 if __name__ == "__main__":
