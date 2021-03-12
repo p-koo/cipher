@@ -23,7 +23,7 @@ python preprocess_wrapper.py --bed_pos='Data/ENCFF252PLM.bed.gz' --bed_neg='Data
 import os, h5py
 import numpy as np
 import argparse
-from . import wrangle
+from .preprocess import wrangle
 
 def main(args):
 

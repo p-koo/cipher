@@ -2,7 +2,7 @@ import os
 import argparse
 import pandas as pd
 from tensorflow import keras
-import load, model_zoo
+from . import load, model_zoo
 
 def main(model_name, data_path, args):
         

@@ -9,5 +9,4 @@ from . import moana
 from . import model_zoo
 from . import preprocess
 from . import train
-from . import process_singletask
 from . import utils
