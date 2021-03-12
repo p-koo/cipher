@@ -31,7 +31,7 @@ def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment,
 
     # get non-overlap between pos peaks and neg peaks
     neg_bed_path = os.path.join(data_path, experiment + '_nonoverlap.bed')
-    wrangle.bedtools_intersect(dnase_path, tf_path, neg_bed_path, write_a=True, nonoverlap=False)
+    wrangle.bedtools_intersect(dnase_path, tf_path, neg_bed_path, write_a=True, nonoverlap=True)
 
     # create new bed file with window enforced
     neg_bed_path2 = os.path.join(data_path, experiment + '_neg_'+str(window)+'.bed')
@@ -60,7 +60,7 @@ def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment,
     labels = np.vstack([np.ones((len(pos_one_hot), 1)), np.zeros((len(neg_one_hot_gc), 1))])
     names = np.concatenate([pos_names, neg_names])
     names = names.astype("S")
-    
+
     # shuffle indices for train, validation, and test sets
     train, valid, test, indices = wrangle.split_dataset(one_hot, labels, valid_frac=valid_frac, test_frac=test_frac)
 

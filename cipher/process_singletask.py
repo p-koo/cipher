@@ -66,7 +66,7 @@ def main(args):
 
     # get non-overlap between pos peaks and neg peaks
     neg_bed_path = os.path.join(data_path, experiment + '_nonoverlap.bed')
-    wrangle.bedtools_intersect(dnase_path, tf_path, neg_bed_path, write_a=True, nonoverlap=False)
+    wrangle.bedtools_intersect(dnase_path, tf_path, neg_bed_path, write_a=True, nonoverlap=True)
 
     # create new bed file with window enforced
     neg_bed_path2 = os.path.join(data_path, experiment + '_neg_'+str(window)+'.bed')
