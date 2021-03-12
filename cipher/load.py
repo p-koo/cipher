@@ -4,7 +4,7 @@ import h5py
 import numpy as np
 
 
-def single_task(filepath, reverse_comp=False):
+def standard_data(filepath, reverse_comp=False):
     """Load single task dataset.
 
     Parameters

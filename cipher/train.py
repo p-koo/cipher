@@ -7,7 +7,7 @@ import load, model_zoo
 def main(model_name, data_path, args):
         
     # Load data
-    x_train, y_train, x_valid, y_valid, x_test, y_test = load.single_task(data_path)
+    x_train, y_train, x_valid, y_valid, x_test, y_test = load.standard_data(data_path, reverse_comp=args.rc)
     
     # Import model from the zoo as singular animal
     animal = __import__("model_zoo." + model_name, globals(), locals(), [model_name], 0) # equivalent of `from model_zoo import model_name as animal` where model_name is evaluated at runtime
@@ -79,9 +79,9 @@ if __name__ == "__main__":
     parser.add_argument('-e', "--epochs", metavar="EPOCHS", type=int, 
                     help="Number of epochs to train each model", 
                     default=200)
-#     parser.add_argument("-rc", metavar="TRAIN_REVERSE_COMP", type=bool, 
-#                     help="Augment dataset with reverse complement sequences",
-#                     default=False)
+    parser.add_argument("-rc", metavar="TRAIN_REVERSE_COMP", type=bool, 
+                    help="Augment dataset with reverse complement sequences",
+                    default=False)
     parser.add_argument('-lr', "--learning_rate", metavar="LEARNING_RATE", type=float, 
                     help="Learning rate for Adam optimizer", 
                     default=0.001)
