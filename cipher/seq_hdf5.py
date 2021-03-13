@@ -1,12 +1,11 @@
-#!/usr/bin/env python
+from collections import OrderedDict
+import random
 import sys
+
 import h5py
 import numpy.random as npr
 import numpy as np
-import pandas as pd
-from collections import OrderedDict
 from sklearn import preprocessing
-import random
 
 ################################################################################
 # seq_hdf5.py
@@ -18,6 +17,8 @@ import random
 ################################################################################
 # main
 ################################################################################
+
+
 def make_h5(
     fasta_file,
     targets_file,
@@ -54,6 +55,9 @@ def make_h5(
     """
 
     # seed rng before shuffle
+    # TODO: numpy suggests creating an instance of a random number generator and
+    # setting a seed during instantiation.
+    # See https://numpy.org/doc/stable/reference/random/generator.html
     npr.seed(random_seed)
 
     #################################################################
@@ -115,13 +119,13 @@ def make_h5(
         targets[i : i + train_count, :],
     )
     i += train_count
-    valid_seqs, valid_targets, valid_headers = (
+    valid_seqs, valid_targets, _ = (
         seqs[i : i + valid_count, :],
         targets[i : i + valid_count, :],
         headers[i : i + valid_count],
     )
     i += valid_count
-    test_seqs, test_targets, test_headers = (
+    test_seqs, test_targets, _ = (
         seqs[i : i + test_count, :],
         targets[i : i + test_count, :],
         headers[i : i + test_count],
@@ -136,8 +140,10 @@ def make_h5(
     target_labels = [n.encode("ascii", "ignore") for n in target_labels]
     # h5f.create_dataset('target_labels', data=target_labels)
     with open(out_header_file, "w") as f:
-        for l in target_labels:
-            f.write("%s\n" % l)
+        for label in target_labels:
+            # TODO: once we add testing, this can probably be simplified to
+            # `f.write(label)`.
+            f.write("%s\n" % label)
 
     if train_count > 0:
         h5f.create_dataset("x_train", data=train_seqs)
@@ -155,7 +161,7 @@ def make_h5(
 
 
 def batch_round(count, batch_size):
-    if batch_size != None:
+    if batch_size is not None:
         count -= batch_size % count
     return count
 
@@ -233,7 +239,7 @@ def hash_sequences_1hot(fasta_file, extend_len=None):
 
 
 def dna_one_hot(seq, seq_len=None, flatten=True, n_random=True):
-    if seq_len == None:
+    if seq_len is None:
         seq_len = len(seq)
         seq_start = 0
     else:
@@ -286,7 +292,7 @@ def hash_scores(scores_file):
 
         try:
             seq_scores[a[0]] = np.array([float(a[i]) for i in range(1, len(a))])
-        except:
+        except Exception:
             print("Ignoring header line", file=sys.stderr)
 
     # consider converting the scores to integers

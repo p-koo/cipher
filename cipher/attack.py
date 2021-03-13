@@ -7,7 +7,7 @@ def input_grad_batch(input_var, y, model, loss):
   with tf.GradientTape() as tape:
     predictions = model(input_var)
     loss_value = loss(y, predictions)
-    return tape.gradient(loss_value, input_var) 
+    return tape.gradient(loss_value, input_var)
 """
 
 

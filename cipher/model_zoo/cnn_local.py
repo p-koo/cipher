@@ -8,38 +8,34 @@ def model(
     units=[24, 48, 96],
     dropout=[0.1, 0.2, 0.5],
 ):
-
-    """
-    Creates a keras neural network with the architecture shown below. The architecture is chosen to promote learning in the first layeer.
+    """Creates a keras neural network with the architecture shown below. The
+    architecture is chosen to promote learning in the first layer.
 
 
     Parameters
     ----------
     input_shape: tuple
-        Tuple of size (L,4) where L is the sequence lenght and 4 is the number of 1-hot channels. Assumes all sequences have equal length.
-
+        Tuple of size (L,4) where L is the sequence lenght and 4 is the number of 1-hot
+        channels. Assumes all sequences have equal length.
     output_shape: int
         Number of output categories.
-
     activation: str
         A string specifying the type of activation. Example: 'relu', 'exponential', ...
-
     units: list
-        Optional parameter. A list of 3 integers that can be used to specify the number of filters. It provide more external control of the architecture.
-
+        Optional parameter. A list of 3 integers that can be used to specify the number
+        of filters. It provide more external control of the architecture.
     dropout: list
-        Optional parameter. A list of 3 probabilities [prob, prob,prob] that can be used to externally control the probabilities of dropouts in the main architecture.
-
+        Optional parameter. A list of 3 probabilities [prob, prob,prob] that can be
+        used to externally control the probabilities of dropouts in the main
+        architecture.
 
     Returns
-    ----------
-    A keras model instance.
-
+    -------
+    Keras Functional Model instance.
 
     Example
-    -----------
-    model = cnn_local_model( (200,4), 1 , 'relu', [24, 48, 96], [0.1, 0.2, 0.5] )
-
+    -------
+    >>> model = cnn_local_model( (200,4), 1 , 'relu', [24, 48, 96], [0.1, 0.2, 0.5] )
     """
 
     # input layer

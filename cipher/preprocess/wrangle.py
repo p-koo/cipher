@@ -10,6 +10,9 @@ import typing
 import numpy as np
 import pandas as pd
 import scipy.stats
+
+# TODO: this is the only dependency that requires a compiler. It does not ship a
+# pre-compiled wheel. Perhaps we can write a python/numpy implementation?
 from ushuffle import shuffle
 
 PathType = typing.Union[str, pathlib.Path]
@@ -98,8 +101,10 @@ def extract_metatable_information(metatable_filtered):
                 List of audit warnings in the ENCODE metatable.
     Example
     -------
-    >>> metatable_filtered = filter_encode_metatable(file_path, save_filtered_table=True)
-    >>> tf, cell_type, file_accession, url, audit = extract_table_information(metatable_filtered)
+    >>> metatable_filtered = filter_encode_metatable(
+        file_path, save_filtered_table=True)
+    >>> tf, cell_type, file_accession, url, audit = extract_table_information(
+        metatable_filtered)
     """
 
     metatable_filtered = metatable_filtered[
@@ -117,7 +122,6 @@ def extract_metatable_information(metatable_filtered):
         "Experiment target"
     ].str.split("-", expand=True)[0]
 
-    index_list = metatable_filtered.index.tolist()
     tf_list = metatable_filtered["Experiment target"].tolist()
     cell_type_list = metatable_filtered["Biosample term name"].tolist()
     file_accession_list = metatable_filtered["File accession"].tolist()
@@ -736,17 +740,16 @@ def shuffle_onehot(one_hot, k=1):
 
     Parameters
     ----------
-    one_hot : numpy.ndarray
-        One_hot encoded sequence with shape (N, L, A)
-    k : int
-        k of k-let frequencies to preserve (e.g., with k = 2, dinucleotide
-        shuffle is performed); default is k = 1 (i.e., single-nucleotide
-        shuffle)
+    one_hot : np.ndarray
+        One_hot encoded sequence with shape (N, L, A).
+    k : int, optional
+        k of k-let frequencies to preserve. For example, with k = 2, dinucleotide
+        shuffle is performed. The default is k = 1 (i.e., single-nucleotide shuffle).
 
     Returns
     -------
-    Numpy array of one-hot represented shuffled sequences, of the same shape
-    as one_hot.
+    np.ndarray
+        One-hot represented shuffled sequences, of the same shape as one_hot.
 
     Examples
     --------
@@ -790,16 +793,15 @@ def shuffle_onehot(one_hot, k=1):
         return one_hot_shuffled
 
     elif k >= 2:
-        seqs = [
-            seq.str.cat() for seq in convert_onehot_to_sequence(one_hot)
-        ]  # convert one_hot to pandas Series of letters, then string letters together (for each Series)
+        # convert one_hot to pandas Series of letters, then string letters together
+        # (for each Series)
+        seqs = [seq.str.cat() for seq in convert_onehot_to_sequence(one_hot)]
         seqs_shuffled = []
 
         for i, seq in enumerate(seqs):
             seq = seq.upper()
-            seq_shuffled = shuffle(bytes(seq, "utf-8"), k).decode(
-                "utf-8"
-            )  # dinucleotide shuffle
+            # dinucleotide shuffle
+            seq_shuffled = shuffle(bytes(seq, "utf-8"), k).decode("utf-8")
 
             seqs_shuffled.append(seq_shuffled)
 
@@ -815,17 +817,16 @@ def shuffle_sequences(sequences, k=1):
 
     Parameters
     ----------
-    one_hot : numpy.ndarray
+    one_hot : np.ndarray
         One_hot encoded sequence with shape (N, L, A)
-    k : int
-        k of k-let frequencies to preserve (e.g., with k = 2, dinucleotide
-        shuffle is performed); default is k = 1 (i.e., single-nucleotide
-        shuffle)
+    k : int, optional
+        k of k-let frequencies to preserve. For example, with k = 2, dinucleotide
+        shuffle is performed. The default is k = 1 (i.e., single-nucleotide shuffle).
 
     Returns
     -------
-    Numpy array of one-hot represented shuffled sequences, of the same shape
-    as one_hot.
+    np.ndarray
+        One-hot represented shuffled sequences, of the same shape as one_hot.
 
     Examples
     --------

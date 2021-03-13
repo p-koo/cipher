@@ -1,12 +1,9 @@
-#!/usr/bin/env python
-# from optparse import OptionParser
 import gzip
 import os
 import re
 import subprocess
 import sys
 
-import h5py
 import numpy as np
 
 
@@ -22,54 +19,50 @@ def multitask_bed_generation(
     no_db_activity=False,
     ignore_y=False,
 ):
+    """Merge multiple bed files to select sample sequence regions with at least one
+    peak.
 
-    """Merge multiple bed files to select sample sequence regions with at least one peak
+    This function outputs a .bed file in the specified directory containing seven
+    columns: chromosome, sequence start, sequence end, name, score, strand, and indexes
+    of experiments that have a peak in this region.
 
     Parameters
-    -------------------
+    ----------
     target_beds_file: str
-        Location of the sample file containing experiment label and their corresponding file locations.
-        Should be a two column text file, first row contains label, sencond row contain directory for
-        the .bed/.bed.gz file.
-    feature_size: int
-        Length of the sequence region per sample in output. Optional.
-        Default to 1k.
-    merge_overlap: int
-        After adjusting peaks into feature_size, if two peak regions overlaps more than this amount, they
-        will be re-centered and merged into a single sample. Optional.
-        Default to 200
-    output_prefix: str
-        Location and naming of the output bed file. Optional.
-        Default to 'features.bed'
-    chrom_lenghts_file: str
-        Location of the chrom.sizes file. Optional.
-        Default to None
-    db_act_file: str
-        Location of the existing database activity table. Optional.
-        Default to None
-    db_bed: str
-        Location of the existing database .bed file. Optional.
-        Default to None
-    ignore_auxiliary: boolean
-        Ignore auxiliary chromosomes.
-        Default to False
-    no_db_acticity: boolean
-        Whether to pass along the activities of the database sequences
-        Default to False
-    ignor_y: boolean
-        Ignore Y chromsosome features
-        Default to False
+        Location of the sample file containing experiment label and their corresponding
+        file locations. Should be a two column text file, first row contains label,
+        second row contain directory for the .bed/.bed.gz file.
+    feature_size: int, optional
+        Length of the sequence region per sample in output. Default to 1000.
+    merge_overlap: int, optional
+        After adjusting peaks into feature_size, if two peak regions overlaps more than
+        this amount, they will be re-centered and merged into a single sample. Defaults
+        to 200.
+    output_prefix: str, optional
+        Location and naming of the output bed file. Default to 'features.bed'
+    chrom_lenghts_file: str, optional
+        Location of the chrom.sizes file. Default to None.
+    db_act_file: str, optional
+        Location of the existing database activity table. Defaults to None.
+    db_bed: str, optional
+        Location of the existing database .bed file. Defaults to None.
+    ignore_auxiliary: bool, optional
+        Ignore auxiliary chromosomes. Defaults to False.
+    no_db_acticity: bool, optional
+        Whether to pass along the activities of the database sequences. Defaults to
+        False.
+    ignor_y: bool, optional
+        Ignore Y chromsosome features. Defaults to False.
 
     Returns
-    ---------------
-    Outputs an .bed file in specified directory contating seven columns, chromosome,
-    sequence start, sequence end, name, score, strand, and indexs of experiments
-    that has a peak in this region.
+    -------
+    None
 
     Examples
-    ----------------
-    multitask_bed_generation(example_file,chrom_lengths_file='/data/hg38.chrom.size',
-                    feature_size=1000,merge_overlap=200,out_prefix='/data/multitask.bed')
+    --------
+    >>> multitask_bed_generation(
+        example_file,chrom_lengths_file='/data/hg38.chrom.size',
+        feature_size=1000,merge_overlap=200,out_prefix='/data/multitask.bed')
     """
 
     if not target_beds_file:
@@ -84,8 +77,9 @@ def multitask_bed_generation(
         db_add = True
         if not no_db_activity:
             if db_act_file is None:
-                raise Exception(
-                    "Must provide both activity table or specify -n if you want to add to an existing database"
+                raise ValueError(
+                    "Must provide both activity table or specify -n if you want to add"
+                    " to an existing database"
                 )
             else:
                 # read db target names
@@ -101,28 +95,28 @@ def multitask_bed_generation(
         if len(a) != 2:
             print(a)
             print(
-                "Each row of the target BEDS file must contain a label and BED file separated by whitespace",
+                "Each row of the target BEDS file must contain a label and BED file"
+                " separated by whitespace",
                 file=sys.stderr,
             )
-            # print >> sys.stderr, 'Each row of the target BEDS file must contain a label and BED file separated by whitespace'
-            exit(1)
+            sys.exit(1)
         target_dbi.append(len(db_targets))
         db_targets.append(a[0])
         target_beds.append(a[1])
 
     # read in chromosome lengths
     chrom_lengths = {}
-    if chrom_lengths_file != None:
+    if chrom_lengths_file is not None:
         chrom_lengths = {}
         for line in open(chrom_lengths_file):
             a = line.split()
             chrom_lengths[a[0]] = int(a[1])
     else:
         print(
-            "Warning: chromosome lengths not provided, so regions near ends may be incorrect.",
+            "Warning: chromosome lengths not provided, so regions near ends may be"
+            " incorrect.",
             file=sys.stderr,
         )
-        # print >> sys.stderr, 'Warning: chromosome lengths not provided, so regions near ends may be incorrect.'
 
     #################################################################
     # print peaks to chromosome-specific files
@@ -207,7 +201,9 @@ def multitask_bed_generation(
 
     # ignore auxiliary
     if ignore_auxiliary:
-        primary_re = re.compile("chr\d+$")
+        # TODO: \d appears to be an invalid escape sequence. And re.compile will escape
+        # \d anyway to \\d.
+        primary_re = re.compile("chr\\d+$")
         for chrom_key in chrom_files.keys():
             chrom, strand = chrom_key
             primary_m = primary_re.match(chrom)

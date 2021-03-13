@@ -1,6 +1,8 @@
-import os, h5py
+import os
+
+import h5py
 import numpy as np
-import argparse
+
 from . import wrangle
 
 
@@ -18,6 +20,7 @@ def process_singletask(
     valid_frac=0.1,
     test_frac=0.2,
 ):
+    """Preprocess data for a single-class task."""
 
     # remove extremely large peaks
     tf_filtered_path = os.path.join(data_path, experiment + "_pos_filtered.bed")
@@ -102,19 +105,13 @@ def process_singletask(
     # save to hdf5 file
     file_path = os.path.join(data_path, experiment + "_" + str(window) + ".h5")
     with h5py.File(file_path, "w") as fout:
-        x_train = fout.create_dataset("x_train", data=train[0], compression="gzip")
-        y_train = fout.create_dataset("y_train", data=train[1], compression="gzip")
-        y_test = fout.create_dataset(
-            "train_names", data=names[indices[0]], compression="gzip"
-        )
-        x_valid = fout.create_dataset("x_valid", data=valid[0], compression="gzip")
-        y_valid = fout.create_dataset("y_valid", data=valid[1], compression="gzip")
-        y_test = fout.create_dataset(
-            "valid_names", data=names[indices[1]], compression="gzip"
-        )
-        x_test = fout.create_dataset("x_test", data=test[0], compression="gzip")
-        y_test = fout.create_dataset("y_test", data=test[1], compression="gzip")
-        y_test = fout.create_dataset(
-            "test_names", data=names[indices[2]], compression="gzip"
-        )
+        fout.create_dataset("x_train", data=train[0], compression="gzip")
+        fout.create_dataset("y_train", data=train[1], compression="gzip")
+        fout.create_dataset("train_names", data=names[indices[0]], compression="gzip")
+        fout.create_dataset("x_valid", data=valid[0], compression="gzip")
+        fout.create_dataset("y_valid", data=valid[1], compression="gzip")
+        fout.create_dataset("valid_names", data=names[indices[1]], compression="gzip")
+        fout.create_dataset("x_test", data=test[0], compression="gzip")
+        fout.create_dataset("y_test", data=test[1], compression="gzip")
+        fout.create_dataset("test_names", data=names[indices[2]], compression="gzip")
     print("Saved to: " + file_path)

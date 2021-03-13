@@ -1,8 +1,8 @@
+import logomaker
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import logomaker
-import matplotlib.cm as cm
 
 
 def plot_attribution_map(saliency_df, ax=None, figsize=(20, 1)):
@@ -30,16 +30,16 @@ def plot_filters(W, fig, num_cols=8, alphabet="ACGT", names=None, fontsize=12):
         ax = fig.add_subplot(num_rows, num_cols, n + 1)
 
         # Calculate sequence logo heights -- information
-        I = np.log2(4) + np.sum(w * np.log2(w + 1e-7), axis=1, keepdims=True)
-        logo = I * w
+        height = np.log2(4) + np.sum(w * np.log2(w + 1e-7), axis=1, keepdims=True)
+        logo = height * w
 
         # Create DataFrame for logomaker
         counts_df = pd.DataFrame(
             data=0.0, columns=list(alphabet), index=list(range(filter_len))
         )
         for a in range(A):
-            for l in range(filter_len):
-                counts_df.iloc[l, a] = logo[l, a]
+            for filter_n in range(filter_len):
+                counts_df.iloc[filter_n, a] = logo[filter_n, a]
 
         logomaker.Logo(counts_df, ax=ax)
         ax = plt.gca()
@@ -141,8 +141,8 @@ def matrix_to_df(x, w, alphabet="ACGT"):
     L, A = w.shape
     counts_df = pd.DataFrame(data=0.0, columns=list(alphabet), index=list(range(L)))
     for a in range(A):
-        for l in range(L):
-            counts_df.iloc[l, a] = w[l, a]
+        for seq_idx in range(L):
+            counts_df.iloc[seq_idx, a] = w[seq_idx, a]
     return counts_df
 
 
@@ -151,14 +151,14 @@ def prob_to_info_df(w, alphabet="ACGT"):
     based on grad x inputs"""
 
     # Calculate sequence logo heights -- information
-    I = np.log2(4) + np.sum(w * np.log2(w + 1e-7), axis=1, keepdims=True)
-    logo = I * w
+    height = np.log2(4) + np.sum(w * np.log2(w + 1e-7), axis=1, keepdims=True)
+    logo = height * w
 
     L, A = logo.shape
     counts_df = pd.DataFrame(data=0.0, columns=list(alphabet), index=list(range(L)))
     for a in range(A):
-        for l in range(L):
-            counts_df.iloc[l, a] = logo[l, a]
+        for seq_idx in range(L):
+            counts_df.iloc[seq_idx, a] = logo[seq_idx, a]
     return counts_df
 
 

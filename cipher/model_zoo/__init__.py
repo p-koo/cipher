@@ -1,1 +1,1 @@
-from . import deepbind
+from . import deepbind  # noqa: F401

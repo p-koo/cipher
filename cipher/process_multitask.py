@@ -1,10 +1,9 @@
 """
-This script will take the following arguments in the command line, import helper functions from an external script, and conduct all preprocessing steps
+This script will take the following arguments in the command line, import helper
+functions from an external script, and conduct all preprocessing steps
 
 Parameters:
---------------
-
-
+-----------
 metadata: str
     location for metadata table containing experiment information
 data_dir: str
@@ -26,12 +25,15 @@ exp_accession_list:list
 
 """
 
+# TODO: the documentation is likely part of the parser help message. We can probably
+# remove it.
 
 from optparse import OptionParser
 import subprocess
-from metadata_to_samplefile import create_samplefile
-from bed_generation import multitask_bed_generation
-from seq_hdf5 import make_h5
+
+from .metadata_to_samplefile import create_samplefile
+from .bed_generation import multitask_bed_generation
+from .seq_hdf5 import make_h5
 
 
 def main():
@@ -106,7 +108,10 @@ def main():
         "--merge_overlap",
         dest="overlap",
         default=200,
-        help="if two peak regions overlaps more than this amount, they will be re-centered and merged into a single sample",
+        help=(
+            "if two peak regions overlaps more than this amount, they will be"
+            " re-centered and merged into a single sample"
+        ),
     )
     (options, args) = parser.parse_args()
     if len(args) != 2:
@@ -134,6 +139,7 @@ def main():
         out_prefix=options.bed_output,
     )
 
+    # TODO: shell=True is probably not necessary here. Remove once tests are in place.
     subprocess.call(
         "bedtools getfasta -fi {} -s -bed {} -fo {}".format(
             options.fasta, options.bed_output + ".bed", options.fa_output

@@ -1,13 +1,14 @@
 import os
-import numpy as np
-import pandas as pd
 import subprocess
-from .wrangle import filter_encode_metatable, extract_metatable_information
+
+import pandas as pd
+
+from .wrangle import extract_metatable_information
+from .wrangle import filter_encode_metatable
 
 
 def _download_url(url, outpath=None):
-    """
-    Download a file from a given url and save it with a specified output file
+    """Download a file from a given url and save it with a specified output file
     if necessary.
 
     Parameters
@@ -24,11 +25,13 @@ def _download_url(url, outpath=None):
 
     Example
     -------
-    >>> url = "https://www.encodeproject.org/files/ENCFF695MMQ/@@download/ENCFF695MMQ.bed.gz"
+    >>> url = "https://www.encodeproject.org/files/ENCFF695MMQ/@@download/ENCFF695MMQ.bed.gz"  # noqa: E501
     >>> outpath = "./downloads/out.bed.gz"
     >>> _download_url(url, outpath)
-
     """
+
+    # TODO: this requires wget to be available. This might not be available on some
+    # systems, like windows.
     if outpath is None:
         cmd = ["wget", url]
     else:
@@ -45,12 +48,10 @@ def download_cell_line_data(metadata_path, tfchipdir):
 
     Parameters
     ----------
-    metadata_path : <str>
+    metadata_path : str
         The path to the input meta data file in tsv format.
-
-    tfchipdir : <str>
-        The path to the directory in which the bed files are to downloaded and saved onto.
-
+    tfchipdir : str
+        The path to the directory in which the bed files are to downloaded and saved.
 
     Returns
     -------
@@ -61,8 +62,8 @@ def download_cell_line_data(metadata_path, tfchipdir):
     >>> metadata_path = './A549.tsv'
     >>> tfchipdir = "./tf_chip/"
     >>> download_cell_line_data(metadata_path, tfchipdir)
-
     """
+
     # load the meta data file and filter its contents
     metatable_filtered = filter_encode_metatable(metadata_path)
     res = extract_metatable_information(metatable_filtered)

@@ -8,38 +8,32 @@ def model(
     units=[24, 32, 48, 64, 96],
     dropout=[0.1, 0.2, 0.3, 0.4, 0.5],
 ):
-
-    """
-    Creates a keras neural network with the architecture shown below. The architecture is chosen to promote learning in a distributive way.
-
+    """Creates a keras neural network with the architecture shown below. The
+    architecture is chosen to promote learning in a distributive way.
 
     Parameters
     ----------
     input_shape: tuple
-        Tuple of size (L,4) where L is the sequence lenght and 4 is the number of 1-hot channels. Assumes all sequences have equal length.
-
+        Tuple of size (L,4) where L is the sequence lenght and 4 is the number of 1-hot
+        channels. Assumes all sequences have equal length.
     output_shape: int
         Number of output categories.
-
-    activation: str
+    activation: str, optional
         A string specifying the type of activation. Example: 'relu', 'exponential', ...
-
-    units: list
-        Optional parameter. A list of 5 integers that can be used to specify the number of filters. It provide more external control of the architecture.
-
-    dropout: list
-        Optional parameter. A list of length 5 with probabilities [prob, prob, prob, prob, prob] that can be used to externally control the probabilities of dropouts in the main architecture.
-
+    units: list, optional
+        A list of 5 integers that can be used to specify the number of filters.
+    dropout: list, optional
+        A list of length 5 with probabilities that can be used to set the probabilities
+        of dropouts in the main architecture.
 
     Returns
-    ----------
-    A keras model instance.
-
+    -------
+    Keras Functional Model
 
     Example
-    -----------
-    model = cnn_dist_model( (200,4), 1 , 'relu', [24, 32, 48, 64, 96 ], [0.1, 0.2, 0.3, 0.4, 0.5] )
-
+    -------
+    >>> model = cnn_dist_model(
+        (200,4), 1 , 'relu', [24, 32, 48, 64, 96 ], [0.1, 0.2, 0.3, 0.4, 0.5] )
     """
 
     # input layer

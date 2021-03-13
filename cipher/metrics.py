@@ -1,5 +1,7 @@
 import numpy as np
-from sklearn.metrics import roc_auc_score, average_precision_score, accuracy_score
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import roc_auc_score
 from scipy import stats
 
 

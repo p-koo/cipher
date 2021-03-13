@@ -1,6 +1,6 @@
 import numpy as np
-import pandas as pd
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
+
 from . import moana
 
 
@@ -74,20 +74,30 @@ def signal_noise_stats(scores, x_model, top_k=10, threshold=0.01):
 
 
 def motif_comparison_synthetic_dataset(file_path, num_filters=32):
-    """Compares tomtom analysis for filters trained on synthetic multitask classification.
-        Works with Tomtom version 5.1.0
+    """Compares tomtom analysis for filters trained on synthetic multitask
+    classification.
 
-    inputs:
-        - file_path: .tsv file output from tomtom analysis
-        - num_filters: number of filters in conv layer (needed to normalize -- tomtom doesn't always give results for every filter)
+    Tested with Tomtom version 5.1.0.
 
-    outputs:
-        - match_fraction: fraction of hits to ground truth motifs
-        - match_any: fraction of hits to any motif in JASPAR (except Gremb1)
-        - filter_match: the motif of the best hit (to a ground truth motif)
-        - filter_qvalue: the q-value of the best hit to a ground truth motif (1.0 means no hit)
-        - motif_qvalue: for each ground truth motif, gives the best qvalue hit
-        - motif_counts for each ground truth motif, gives number of filter hits
+    Parameters
+    ----------
+    file_path : str
+        TSV file output from tomtom analysis.
+    num_filters : int
+        Number of filters in conv layer (needed to normalize. Tomtom does not always
+        give results for every filter.
+
+    Returns
+    -------
+    tuple with the following items
+
+        - match_fraction: fraction of hits to ground truth motifs.
+        - match_any: fraction of hits to any motif in JASPAR (except Gremb1).
+        - filter_match: the motif of the best hit (to a ground truth motif).
+        - filter_qvalue: the q-value of the best hit to a ground truth motif.
+            (1.0 means no hit).
+        - motif_qvalue: for each ground truth motif, gives the best qvalue hit.
+        - motif_counts for each ground truth motif, gives number of filter hits.
     """
 
     arid3 = ["MA0151.1", "MA0601.1", "PB0001.1"]
@@ -127,6 +137,8 @@ def motif_comparison_synthetic_dataset(file_path, num_filters=32):
         num_counts,
     ) = moana.match_hits_to_ground_truth(file_path, motifs, motif_names, num_filters)
 
+    # TODO: consider using a namedtuple here to make it more explicit to the user what
+    # each value represents.
     return (
         match_fraction,
         match_any,

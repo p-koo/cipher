@@ -9,38 +9,34 @@ from tensorflow import keras
 def model(
     input_shape, output_shape, activation="relu", units=[24, 48], dropout=[0.1, 0.5]
 ):
-
-    """
-    Creates a keras neural network model similar to the original DeepBind architecture. The difference is that it allows for custom specification of the activation of the first convolutional layer.
-
+    """Creates a keras neural network model similar to the original DeepBind
+    architecture. The difference is that it allows for custom specification of the
+    activation of the first convolutional layer.
 
     Parameters
     ----------
     input_shape: tuple
-        Tuple of size (L,4) where L is the sequence lenght and 4 is the number of 1-hot channels. Assumes all sequences have equal length.
-
+        Tuple of size (L,4) where L is the sequence lenght and 4 is the number of 1-hot
+        channels. Assumes all sequences have equal length.
     output_shape: int
         Number of output categories.
-
     activation: str
         A string specifying the type of activation. Example: 'relu', 'exponential', ...
-
     units: list
-        Optional parameter. A list of shape [int, int] that can be used to specify the number of filters. It provide more external control of the architecture.
-
+        Optional parameter. A list of shape [int, int] that can be used to specify the
+        number of filters. It provide more external control of the architecture.
     dropout: list
-        Optional parameter. A list of the form [probability, probability] that can be used to externally control the probabilities of dropouts in the main architecture.
-
+        Optional parameter. A list of the form [probability, probability] that can be
+        used to externally control the probabilities of dropouts in the main
+        architecture.
 
     Returns
     ----------
-    A keras model instance.
-
+    Keras Functional Model instance.
 
     Example
-    -----------
-    model = deepbind_custom( (200,4), 1 , 'relu', [24,48], [0.1, 0.5] )
-
+    -------
+    >>> model = deepbind_custom( (200,4), 1 , 'relu', [24,48], [0.1, 0.5] )
     """
 
     # input layer

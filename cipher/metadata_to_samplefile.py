@@ -1,22 +1,20 @@
 #!/usr/bin/env python
-import numpy as np
 import pandas as pd
 import os
 
 
 def make_label(df_row):
-
-    """Generate a unique label for each row selected
+    """Generate a unique label for each row selected.
 
     Parameters
     ----------
-    df_row : pandas.Series
-        one row of interest
+    df_row : pd.Series
+        Row of interest.
 
     Returns
     -------
     str
-    label made by concatenation of relevant columns.
+        Label made by concatenation of relevant columns.
     """
     label_list = [
         str(c.values[0])
@@ -50,10 +48,8 @@ def process_exp(data_dir, exp_accession, metadata, assembly, criteria):
     Returns
     -------
     list or bool
-        [row selected, summary line for the sample file] if experiment found
-        False if no entries found
-
-
+        [row selected, summary line for the sample file] if experiment found.
+        False if no entries found.
     """
     print("Processing ", exp_accession)
     # get the rows of the metadata table corresponding to the experiment and of
@@ -92,18 +88,21 @@ def process_exp(data_dir, exp_accession, metadata, assembly, criteria):
 
 def get_filepath(data_dir, filename):
     """Generate path where the file is found
+
     Parameters
     ----------
     data_dir : str
         dataset directory with files
     filename : str
         file identifier, i.e. the file accession
+
     Returns
     -------
     str
         file path if present
         empty string if absent
     """
+    # TODO: replace thsee operations with pathlib.
     filepath = os.path.abspath(os.path.join(data_dir, filename + ".bed"))
     if os.path.isfile(filepath):
         return filepath
@@ -112,13 +111,6 @@ def get_filepath(data_dir, filename):
         return filepath + ".gz"
     else:
         return ""
-
-
-# assembly = 'GRCh38'
-# data_dir = '/mnt/31dac31c-c4e2-4704-97bd-0788af37c5eb/hackathon'
-# metadata_path = 'metadata_1.tsv'
-# output_path = 'test_HepG2'
-# exp_accession_list = ['ENCSR580HOI', 'ENCSR956OSX', 'nonexistent_bed'] #optional
 
 
 def create_samplefile(
@@ -131,6 +123,7 @@ def create_samplefile(
     exp_accession_list=[],
 ):
     """Generate subset of metadata table and sample file for further processing
+
     Parameters
     ----------
     data_dir : str
@@ -147,7 +140,6 @@ def create_samplefile(
         dictionary of column, value pairs to use in making a selection
     exp_accession_list : list
         list of experiments to select, if empty select all in the metadata table
-
     """
     assert metadata_path.endswith(".tsv") or metadata_path.endswith(".csv"), print(
         "Metadata should be a tsv or a csv file"
@@ -174,7 +166,6 @@ def create_samplefile(
     selected_data["path"] = [entry[1] for entry in summary]
 
     with open(sample_output_path, "w") as filehandle:
-        for l in summary:
-
-            filehandle.write("{}\t{}\n".format(l[0], l[1]))
+        for line in summary:
+            filehandle.write("{}\t{}\n".format(line[0], line[1]))
     selected_data.to_csv(subset_output_path)

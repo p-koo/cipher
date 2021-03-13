@@ -1,8 +1,7 @@
-import os
 import argparse
 import pandas as pd
 from tensorflow import keras
-from cipher import load, model_zoo
+from cipher import load
 
 
 def main(model_name, data_path, args):
@@ -13,9 +12,15 @@ def main(model_name, data_path, args):
     )
 
     # Import model from the zoo as singular animal
+    # equivalent of `from model_zoo import model_name as animal` where model_name is
+    # evaluated at runtime.
+
+    # TODO: this code is difficult to understand. If there is buggy behavior related to
+    # this line, it will be difficult to debug. I propose refactoring this to use a
+    # method that grabs the model function from a dictionary of the known models.
     animal = __import__(
         "cipher.model_zoo." + model_name, globals(), locals(), [model_name], 0
-    )  # equivalent of `from model_zoo import model_name as animal` where model_name is evaluated at runtime
+    )
 
     # Build model
     num_labels = y_train.shape[1]
@@ -71,13 +76,17 @@ def main(model_name, data_path, args):
 
 
 if __name__ == "__main__":
-    ## ---------- Parse arguments ----------
+    # ---------- Parse arguments ----------
     # EG.
-    # python train_single_task.py -m deepbind -d ../data/test_dataset.h5 -o ../results/test_deepbind_trial1" -e 200 -bs 64
+    # python train_single_task.py -m deepbind -d ../data/test_dataset.h5 \
+    #   -o ../results/test_deepbind_trial1" -e 200 -bs 64
 
     parser = argparse.ArgumentParser(
         description="Train model on single-task dataset and save outputs.",
-        epilog="Example usage: python train_single_task.py -epochs 200 deepbind ../data/test_dataset.h5 ../results/test_deepbind_trial1",
+        epilog=(
+            "Example usage: python train_single_task.py -epochs 200 deepbind"
+            " ../data/test_dataset.h5 ../results/test_deepbind_trial1"
+        ),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -100,7 +109,10 @@ if __name__ == "__main__":
         "--output_path_prefix",
         metavar="/PATH/TO/OUTPUT/PLUS_PREFIX",
         type=str,
-        help="Path (if not current working directory) plus filename prefix for two outputs: weights and history",
+        help=(
+            "Path (if not current working directory) plus filename prefix for two"
+            " outputs: weights and history"
+        ),
     )
 
     parser.add_argument(
@@ -140,7 +152,10 @@ if __name__ == "__main__":
         "--lr_factor",
         metavar="REDUCELRONPLATEAU_FACTOR",
         type=float,
-        help="Factor for learning rate reduction on plateau callback (see keras.callbacks.ReduceLROnPlateau())",
+        help=(
+            "Factor for learning rate reduction on plateau callback"
+            " (see tensorflow.keras.callbacks.ReduceLROnPlateau())"
+        ),
         default=0.2,
     )
     parser.add_argument(
@@ -148,7 +163,10 @@ if __name__ == "__main__":
         "--lr_patience",
         metavar="REDUCELRONPLATEAU_PATIENCE",
         type=float,
-        help="Patience for learning rate reduction on plateau callback (see tensorflow.keras.callbacks.EarlyStopping())",
+        help=(
+            "Patience for learning rate reduction on plateau callback"
+            " (see tensorflow.keras.callbacks.EarlyStopping())"
+        ),
         default=3,
     )
     parser.add_argument(
@@ -156,7 +174,10 @@ if __name__ == "__main__":
         "--es_patience",
         metavar="EARLYSTOPPING_PATIENCE",
         type=float,
-        help="Patience for early stopping callback (see tensorflow.keras.callbacks.ReduceLROnPlateau())",
+        help=(
+            "Patience for early stopping callback"
+            " (see tensorflow.keras.callbacks.ReduceLROnPlateau())"
+        ),
         default=10,
     )
 

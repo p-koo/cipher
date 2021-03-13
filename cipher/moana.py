@@ -154,13 +154,15 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
         - file_path: .tsv file output from tomtom analysis
         - motifs: list of list of JASPAR ids
         - motif_names: name of motifs in the list
-        - num_filters: number of filters in conv layer (needed to normalize -- tomtom doesn't always give results for every filter)
+        - num_filters: number of filters in conv layer (needed to normalize -- tomtom
+            doesn't always give results for every filter)
 
     outputs:
         - match_fraction: fraction of hits to ground truth motifs
         - match_any: fraction of hits to any motif in JASPAR (except Gremb1)
         - filter_match: the motif of the best hit (to a ground truth motif)
-        - filter_qvalue: the q-value of the best hit to a ground truth motif (1.0 means no hit)
+        - filter_qvalue: the q-value of the best hit to a ground truth motif
+            (1.0 means no hit)
         - motif_qvalue: for each ground truth motif, gives the best qvalue hit
         - motif_counts for each ground truth motif, gives number of filter hits
     """
@@ -192,7 +194,7 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
             for id in motif:
 
                 # check if there is a match
-                index = np.where((targets == id) == True)[0]
+                index = np.where(targets == id)[0]
                 if len(index) > 0:
                     qvalue = subdf["q-value"].to_numpy()[index]
 
@@ -202,7 +204,7 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
                         best_match[filter_index] = k
 
         # dont' count hits to Gmeb1 (because too many)
-        index = np.where((targets == "MA0615.1") == True)[0]
+        index = np.where(targets == "MA0615.1")[0]
         if len(index) > 0:
             if len(targets) == 1:
                 correction += 1
@@ -211,12 +213,11 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
     filter_match = [motif_names[i] for i in best_match]
 
     # get hits to any motif
-    num_matches = (
-        len(np.unique(df["Query_ID"])) - 3.0
-    )  # 3 is correction because of last 3 lines of comments in the tsv file (may change across tomtom versions)
-    match_any = (
-        num_matches - correction
-    ) / num_filters  # counts hits to any motif (not including Grembl)
+    # 3 is correction because of last 3 lines of comments in the tsv file (may change
+    # across tomtom versions)
+    num_matches = len(np.unique(df["Query_ID"])) - 3.0
+    # counts hits to any motif (not including Grembl)
+    match_any = (num_matches - correction) / num_filters
 
     # match fraction to ground truth motifs
     match_index = np.where(filter_qvalue != 1.0)[0]
@@ -235,6 +236,7 @@ def match_hits_to_ground_truth(file_path, motifs, motif_names=None, num_filters=
             motif_qvalue[i] = np.min(filter_qvalue[index])
             motif_counts[i] = len(index)
 
+    # TODO: consider changing this to a namedtuple to make the output explicit.
     return (
         match_fraction,
         match_any,

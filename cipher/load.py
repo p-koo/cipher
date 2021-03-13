@@ -10,7 +10,9 @@ def standard_data(filepath, reverse_comp=False):
     Parameters
     ----------
     filepath : string
-        String path to file.
+        Path to HDF5 file.
+    reverse_comp : bool, optional
+        Append reverse complements to each sequence.
 
     Returns
     -------
@@ -20,11 +22,13 @@ def standard_data(filepath, reverse_comp=False):
     y_valid : valid labels, shape = (N, num_labels)
     x_test : test data, shape = (N, L, A)
     y_test : test labels, shape = (N, num_labels)
-
     """
 
     with h5py.File(filepath, "r") as dataset:
+        # TODO: dtype can be set in the `np.array` call. Doing that might avoid an
+        # unnecessary copy (but perhaps not).
         x_train = np.array(dataset["x_train"]).astype(np.float32)
+        # TODO: should y_train be cast to float32?
         y_train = np.array(dataset["y_train"]).astype(np.float32)
         x_valid = np.array(dataset["x_valid"]).astype(np.float32)
         y_valid = np.array(dataset["y_valid"]).astype(np.int32)
@@ -44,6 +48,8 @@ def standard_data(filepath, reverse_comp=False):
         y_valid = np.vstack([y_valid, y_valid])
         y_test = np.vstack([y_test, y_test])
 
+    # TODO: consider making this a namedtuple to be explicit about what each variable
+    # represents.
     return x_train, y_train, x_valid, y_valid, x_test, y_test
 
 

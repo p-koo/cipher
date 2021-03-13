@@ -1,6 +1,8 @@
 """
-This script will take the following arguments in the command line, import helper functions from an external script, and conduct all preprocessing steps:
+This script will take the following arguments in the command line, import helper
+functions from an external script, and conduct all preprocessing steps:
 command line usage: python preprocess_wrapper.py --bed_pos = <> --neg_pos= <> ,...
+
 Parameters
 ----------
 bed_pos : <str>
@@ -11,19 +13,28 @@ experiment : <str>
 ref : <str>
 test_frac : <float>
 validation_frac : <float>
+
 Returns
 _______
 train, test, and validation .hdf5 files in 'data' folder
+
 Example
 -------
 For .bed files and reference .fasta in folder called 'Data':
-python preprocess_wrapper.py --bed_pos='Data/ENCFF252PLM.bed.gz' --bed_neg='Data/ENCFF209DJG.bed.gz' --window_size=200 --data_path='Data/' --experiment='CTCF' --ref='Data/hg19.fa'
+python preprocess_wrapper.py --bed_pos='Data/ENCFF252PLM.bed.gz' \\
+    --bed_neg='Data/ENCFF209DJG.bed.gz' --window_size=200 --data_path='Data/' \\
+    --experiment='CTCF' --ref='Data/hg19.fa'
 """
 
-import os, h5py
-import numpy as np
+# TODO: the documentation above should mostly be handled by the parser.
+
 import argparse
-from cipher.preprocess import wrangle
+import os
+
+import h5py
+import numpy as np
+
+from .preprocess import wrangle
 
 
 def main(args):
@@ -38,7 +49,8 @@ def main(args):
     # optional arguments
     window = args.window  # sequence length for dataset
     alphabet = args.alphabet  # alphabet 'ACGT'
-    compression = args.compression  # compression of bed files (gzip or None)
+    # TODO: add compression. At the moment, the variable is not used.
+    # compression = args.compression  # compression of bed files (gzip or None)
     max_len = (
         args.max_len
     )  # maximum length of peaks (above this cutoff are filtered out)
@@ -115,28 +127,23 @@ def main(args):
     # save to hdf5 file
     file_path = os.path.join(data_path, experiment + "_" + str(window) + ".h5")
     with h5py.File(file_path, "w") as fout:
-        x_train = fout.create_dataset("x_train", data=train[0], compression="gzip")
-        y_train = fout.create_dataset("y_train", data=train[1], compression="gzip")
-        y_test = fout.create_dataset(
-            "train_names", data=names[indices[0]], compression="gzip"
-        )
-        x_valid = fout.create_dataset("x_valid", data=valid[0], compression="gzip")
-        y_valid = fout.create_dataset("y_valid", data=valid[1], compression="gzip")
-        y_test = fout.create_dataset(
-            "valid_names", data=names[indices[1]], compression="gzip"
-        )
-        x_test = fout.create_dataset("x_test", data=test[0], compression="gzip")
-        y_test = fout.create_dataset("y_test", data=test[1], compression="gzip")
-        y_test = fout.create_dataset(
-            "test_names", data=names[indices[2]], compression="gzip"
-        )
+        fout.create_dataset("x_train", data=train[0], compression="gzip")
+        fout.create_dataset("y_train", data=train[1], compression="gzip")
+        fout.create_dataset("train_names", data=names[indices[0]], compression="gzip")
+        fout.create_dataset("x_valid", data=valid[0], compression="gzip")
+        fout.create_dataset("y_valid", data=valid[1], compression="gzip")
+        fout.create_dataset("valid_names", data=names[indices[1]], compression="gzip")
+        fout.create_dataset("x_test", data=test[0], compression="gzip")
+        fout.create_dataset("y_test", data=test[1], compression="gzip")
+        fout.create_dataset("test_names", data=names[indices[2]], compression="gzip")
     print("Saved to: " + file_path)
 
 
 if __name__ == "__main__":
-    ## ---------- Parse arguments ----------
+    # ---------- Parse arguments ----------
     # Eg.
-    # $ process_singletask.py -tf tf_path -dnase dnase_path -g genome_path -d data_path -e experiment -w 200 -c gzip -m 300
+    # $ process_singletask.py -tf tf_path -dnase dnase_path -g genome_path \
+    #    -d data_path -e experiment -w 200 -c gzip -m 300
 
     parser = argparse.ArgumentParser(
         description="Pre-Processing TF ChIP-seq datasets for binary classification."

@@ -133,7 +133,8 @@ class MultiHeadAttention(keras.layers.Layer):
 
     def split_heads(self, x, batch_size, seq_len):
         """Split the last dimension into (num_heads, depth).
-        Transpose the result such that the shape is (batch_size, num_heads, seq_len, depth)
+        Transpose the result such that the shape is (batch_size, num_heads, seq_len,
+        depth).
         """
         x = tf.reshape(x, (batch_size, seq_len, self.num_heads, self.depth))
         return tf.transpose(x, perm=[0, 2, 1, 3])
@@ -223,9 +224,9 @@ class GaussianSampleLayer(keras.layers.Layer):
         self.stddev = stddev
 
     def call(self, input_mu, input_logvar):
-        sigma = tf.math.sqrt(tf.math.exp(incoming_logvar) + 1e-7)
+        sigma = tf.math.sqrt(tf.math.exp(input_logvar) + 1e-7)
         z = tf.random_normal(
-            shape=tf.shape(incoming_mu),
+            shape=tf.shape(input_mu),
             mean=self.mean,
             stddev=self.stddev,
             dtype=input_mu.dtype,
@@ -242,7 +243,7 @@ class CategoricalSampleLayer(keras.layers.Layer):
         super(CategoricalSampleLayer, self).__init__(**kwargs)
 
     def call(self, inputs, temperature, axis=1, hard=False):
-        return gumbel_softmax(logits, temperature, axis, hard)
+        return gumbel_softmax(inputs, temperature, axis, hard)
 
 
 def gumbel_softmax_sample(logits, temperature, axis=None):
