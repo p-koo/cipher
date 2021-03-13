@@ -32,11 +32,11 @@ def standard_data(filepath, reverse_comp=False):
         y_test = np.array(dataset["y_test"]).astype(np.int32)
 
     if reverse_comp:
-        x_train_rc = x_train[:,::-1,:][:,:,::-1]
-        x_valid_rc = x_valid[:,::-1,:][:,:,::-1]
-        x_test_rc = x_test[:,::-1,:][:,:,::-1]
-        
-        # merge forward and reverse complement 
+        x_train_rc = x_train[:, ::-1, :][:, :, ::-1]
+        x_valid_rc = x_valid[:, ::-1, :][:, :, ::-1]
+        x_test_rc = x_test[:, ::-1, :][:, :, ::-1]
+
+        # merge forward and reverse complement
         x_train = np.vstack([x_train, x_train_rc])
         x_valid = np.vstack([x_valid, x_valid_rc])
         x_test = np.vstack([x_test, x_test_rc])
@@ -48,15 +48,3 @@ def standard_data(filepath, reverse_comp=False):
 
 
 # TODO: def multi_task(filepath):
-
-
-
-
-
-
-
-
-
-
-
-

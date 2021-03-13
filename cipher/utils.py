@@ -29,10 +29,3 @@ def make_directory(dirpath, verbose=1):
     if not os.path.isdir(dirpath):
         os.mkdir(dirpath)
         print("making directory: " + dirpath)
-
-
-
-
-
-
-

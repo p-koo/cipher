@@ -3,21 +3,35 @@ import numpy as np
 import argparse
 from . import wrangle
 
-def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment, 
-                       window=200, alphabet='ACGT', compression='gzip', max_len=300, 
-                       gc_match=True, valid_frac=0.1, test_frac=0.2):
+
+def process_singletask(
+    tf_path,
+    dnase_path,
+    genome_path,
+    data_path,
+    experiment,
+    window=200,
+    alphabet="ACGT",
+    compression="gzip",
+    max_len=300,
+    gc_match=True,
+    valid_frac=0.1,
+    test_frac=0.2,
+):
 
     # remove extremely large peaks
-    tf_filtered_path = os.path.join(data_path, experiment+'_pos_filtered.bed')
+    tf_filtered_path = os.path.join(data_path, experiment + "_pos_filtered.bed")
     wrangle.filter_max_length(tf_path, tf_filtered_path, max_len)
 
     # create new bed file with window size enforced
-    pos_bed_path = os.path.join(data_path, experiment+'_pos_'+str(window)+'.bed')
+    pos_bed_path = os.path.join(data_path, experiment + "_pos_" + str(window) + ".bed")
     wrangle.enforce_constant_size(tf_filtered_path, pos_bed_path, window)
 
     # extract sequences from bed file and save to fasta file
-    pos_fasta_path = os.path.join(data_path, experiment+'_pos.fa')
-    wrangle.bedtools_getfasta(pos_bed_path, genome_path, output_path=pos_fasta_path, strand=True)
+    pos_fasta_path = os.path.join(data_path, experiment + "_pos.fa")
+    wrangle.bedtools_getfasta(
+        pos_bed_path, genome_path, output_path=pos_fasta_path, strand=True
+    )
 
     # parse sequence from fasta file
     pos_seq, pos_names = wrangle.parse_fasta(pos_fasta_path)
@@ -30,16 +44,20 @@ def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment,
     pos_one_hot = wrangle.convert_one_hot(pos_seq, alphabet)
 
     # get non-overlap between pos peaks and neg peaks
-    neg_bed_path = os.path.join(data_path, experiment + '_nonoverlap.bed')
-    wrangle.bedtools_intersect(dnase_path, tf_path, neg_bed_path, write_a=True, nonoverlap=True)
+    neg_bed_path = os.path.join(data_path, experiment + "_nonoverlap.bed")
+    wrangle.bedtools_intersect(
+        dnase_path, tf_path, neg_bed_path, write_a=True, nonoverlap=True
+    )
 
     # create new bed file with window enforced
-    neg_bed_path2 = os.path.join(data_path, experiment + '_neg_'+str(window)+'.bed')
+    neg_bed_path2 = os.path.join(data_path, experiment + "_neg_" + str(window) + ".bed")
     wrangle.enforce_constant_size(neg_bed_path, neg_bed_path2, window)
 
     # extract sequences from bed file and save to fasta file
-    neg_fasta_path = os.path.join(data_path, experiment + '_neg.fa')
-    wrangle.bedtools_getfasta(neg_bed_path2, genome_path, output_path=neg_fasta_path, strand=True)
+    neg_fasta_path = os.path.join(data_path, experiment + "_neg.fa")
+    wrangle.bedtools_getfasta(
+        neg_bed_path2, genome_path, output_path=neg_fasta_path, strand=True
+    )
 
     # parse sequence and chromosome from fasta file
     neg_seq, neg_names = wrangle.parse_fasta(neg_fasta_path)
@@ -64,29 +82,39 @@ def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment,
 
             index = wrangle.sample_b_matched_to_a(gc_pos, gc_neg)
         else:
-            index = np.random.permutation(len(neg_one_hot))[:len(pos_one_hot)]
+            index = np.random.permutation(len(neg_one_hot))[: len(pos_one_hot)]
         neg_one_hot = neg_one_hot[index]
         neg_names = neg_names[index]
 
     # merge positive and negative labels
     one_hot = np.vstack([pos_one_hot, neg_one_hot])
-    labels = np.vstack([np.ones((len(pos_one_hot), 1)), np.zeros((len(neg_one_hot), 1))])
+    labels = np.vstack(
+        [np.ones((len(pos_one_hot), 1)), np.zeros((len(neg_one_hot), 1))]
+    )
     names = np.concatenate([pos_names, neg_names])
     names = names.astype("S")
 
     # shuffle indices for train, validation, and test sets
-    train, valid, test, indices = wrangle.split_dataset(one_hot, labels, valid_frac=valid_frac, test_frac=test_frac)
+    train, valid, test, indices = wrangle.split_dataset(
+        one_hot, labels, valid_frac=valid_frac, test_frac=test_frac
+    )
 
     # save to hdf5 file
-    file_path = os.path.join(data_path, experiment+'_'+str(window)+'.h5')
+    file_path = os.path.join(data_path, experiment + "_" + str(window) + ".h5")
     with h5py.File(file_path, "w") as fout:
         x_train = fout.create_dataset("x_train", data=train[0], compression="gzip")
         y_train = fout.create_dataset("y_train", data=train[1], compression="gzip")
-        y_test = fout.create_dataset("train_names", data=names[indices[0]], compression="gzip")
+        y_test = fout.create_dataset(
+            "train_names", data=names[indices[0]], compression="gzip"
+        )
         x_valid = fout.create_dataset("x_valid", data=valid[0], compression="gzip")
         y_valid = fout.create_dataset("y_valid", data=valid[1], compression="gzip")
-        y_test = fout.create_dataset("valid_names", data=names[indices[1]], compression="gzip")
+        y_test = fout.create_dataset(
+            "valid_names", data=names[indices[1]], compression="gzip"
+        )
         x_test = fout.create_dataset("x_test", data=test[0], compression="gzip")
         y_test = fout.create_dataset("y_test", data=test[1], compression="gzip")
-        y_test = fout.create_dataset("test_names", data=names[indices[2]], compression="gzip")
+        y_test = fout.create_dataset(
+            "test_names", data=names[indices[2]], compression="gzip"
+        )
     print("Saved to: " + file_path)

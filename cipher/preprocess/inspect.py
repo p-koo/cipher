@@ -19,10 +19,10 @@ def plot_bed_histogram(bed_path, bins=20, ax=None, fontsize=12, **kwargs):
         Figure handle to plot. If None, then generates a new figure
     fontsize : <int>
         font size for labels and ticks
-    kwargs: 
+    kwargs:
         optional dictionary arguments for matplotlib.pyplot.hist
 
-    Returns 
+    Returns
     -----------
     histogram of .bed file peak sizes
 
@@ -41,10 +41,11 @@ def plot_bed_histogram(bed_path, bins=20, ax=None, fontsize=12, **kwargs):
     """
 
     # check if bedfile is compressed
-    if bed_path.split('.')[-1] == "gz" or bed_path.split('.')[-1] == "gzip": compression="gzip"
+    if bed_path.split(".")[-1] == "gz" or bed_path.split(".")[-1] == "gzip":
+        compression = "gzip"
 
     # load bed file
-    f = open(bed_path, 'rb')
+    f = open(bed_path, "rb")
     df = pd.read_table(f, header=None, compression=compression)
     chrom = df[0].to_numpy().astype(str)
     start = df[1].to_numpy()
@@ -59,16 +60,15 @@ def plot_bed_histogram(bed_path, bins=20, ax=None, fontsize=12, **kwargs):
         ax.hist(peak_sizes, bins, **kwargs)
     else:
         plt.hist(peak_sizes, bins, **kwargs)
-    plt.xlabel('Peak size (nt)', fontsize=fontsize)
-    plt.ylabel('Counts', fontsize=fontsize)
+    plt.xlabel("Peak size (nt)", fontsize=fontsize)
+    plt.ylabel("Counts", fontsize=fontsize)
     plt.setp(ax.get_yticklabels(), fontsize=fontsize)
     plt.setp(ax.get_xticklabels(), fontsize=fontsize)
 
 
-
 def gc_content_histgram(one_hot, bins=15, ax=None, fontsize=12, **kwargs):
     """
-    Function to plot histogram of of GC content across one-hot sequences 
+    Function to plot histogram of of GC content across one-hot sequences
 
     Parameters
     -----------
@@ -80,12 +80,12 @@ def gc_content_histgram(one_hot, bins=15, ax=None, fontsize=12, **kwargs):
         Figure handle to plot. If None, then generates a new figure
     fontsize : <int>
         font size for labels and ticks
-    kwargs: 
+    kwargs:
         optional dictionary arguments for matplotlib.pyplot.hist
 
     Returns
     -----------
-    histograms of GC content 
+    histograms of GC content
 
     Example
     -----------
@@ -96,7 +96,7 @@ def gc_content_histgram(one_hot, bins=15, ax=None, fontsize=12, **kwargs):
     # nucleotide frequency matched background
     freq = np.mean(one_hot, axis=1)
 
-    # summing g+c count for each sequence: 
+    # summing g+c count for each sequence:
     gc = np.sum(freq[:, 1:3], axis=1)
 
     # plot histogram of gc content
@@ -104,10 +104,7 @@ def gc_content_histgram(one_hot, bins=15, ax=None, fontsize=12, **kwargs):
         ax.hist(gc, bins, **kwargs)
     else:
         plt.hist(gc, bins, **kwargs)
-    plt.xlabel('GC-content', fontsize=fontsize)
-    plt.ylabel('Counts', fontsize=fontsize)
+    plt.xlabel("GC-content", fontsize=fontsize)
+    plt.ylabel("Counts", fontsize=fontsize)
     plt.setp(ax.get_yticklabels(), fontsize=fontsize)
     plt.setp(ax.get_xticklabels(), fontsize=fontsize)
-
-
-
