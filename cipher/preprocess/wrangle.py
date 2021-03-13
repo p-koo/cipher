@@ -447,8 +447,8 @@ def match_gc(pos_one_hot, neg_one_hot):
     """
 
     # nucleotide frequency matched background
-    f_pos = np.mean(pos_one_hot, axis=2)
-    f_neg = np.mean(neg_one_hot, axis=2)
+    f_pos = np.mean(pos_one_hot, axis=1)
+    f_neg = np.mean(neg_one_hot, axis=1)
 
     # get GC content for pos and neg sequences
     gc_pos = np.sum(f_pos[:, 1:3], axis=1)
