@@ -12,7 +12,7 @@ from cipher.preprocess.wrangle import _is_gzipped
 from cipher.preprocess.wrangle import filter_max_length
 from cipher.preprocess.wrangle import enforce_constant_size
 from cipher.preprocess.wrangle import parse_fasta
-from cipher.preprocess.wrangle import one_hot
+from cipher.preprocess.wrangle import convert_one_hot
 from cipher.preprocess.wrangle import convert_onehot_to_sequence
 from cipher.preprocess.wrangle import filter_nonsense_sequences
 
@@ -164,9 +164,9 @@ def test_parse_fasta(
 def test_one_hot(val: typing.List[str], ref, alphabet: str):
     if ref is ValueError:
         with pytest.raises(ref):
-            one_hot(val, alphabet=alphabet)
+            convert_one_hot(val, alphabet=alphabet)
     else:
-        out = one_hot(val, alphabet=alphabet)
+        out = convert_one_hot(val, alphabet=alphabet)
         np.testing.assert_array_equal(out, ref)
 
 
