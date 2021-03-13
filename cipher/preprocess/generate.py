@@ -5,7 +5,7 @@ from . import wrangle
 
 def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment, 
                        window=200, alphabet='ACGT', compression='gzip', max_len=300, 
-                       valid_frac=0.1, test_frac=0.2):
+                       gc_match=True, valid_frac=0.1, test_frac=0.2):
 
     # remove extremely large peaks
     tf_filtered_path = os.path.join(data_path, experiment+'_pos_filtered.bed')
@@ -51,13 +51,27 @@ def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment,
     # convert filtered sequences to one-hot representation
     neg_one_hot = wrangle.convert_one_hot(neg_seq, alphabet)
 
-    # calling match_gc function to balance neg sequences with pos by GC content:
-    neg_one_hot_gc, gc_index = wrangle.match_gc(pos_one_hot, neg_one_hot)
-    neg_names = neg_names[gc_index]
+    if len(neg_one_hot) > len(pos_one_hot):
+        # subselect background sequences according to gc-content
+        if gc_match:
+            # calling match_gc function to balance neg sequences with pos by GC content:
+            f_pos = np.mean(pos_one_hot, axis=1)
+            f_neg = np.mean(neg_one_hot, axis=1)
 
-    # merge postive and negative sequences
-    one_hot = np.vstack([pos_one_hot, neg_one_hot_gc])
-    labels = np.vstack([np.ones((len(pos_one_hot), 1)), np.zeros((len(neg_one_hot_gc), 1))])
+            # get GC content for pos and neg sequences
+            gc_pos = np.sum(f_pos[:, 1:3], axis=1)
+            gc_neg = np.sum(f_neg[:, 1:3], axis=1)
+
+            index = wrangle.sample_b_matched_to_a(gc_pos, gc_neg, seed=2)
+            neg_one_hot = neg_one_hot[index]
+        else:
+            index = np.random.permutation(len(neg_one_hot))[:len(pos_one_hot)]
+        neg_one_hot = neg_one_hot[index]
+        neg_names = neg_names[index]
+
+    # merge positive and negative labels
+    one_hot = np.vstack([pos_one_hot, neg_one_hot])
+    labels = np.vstack([np.ones((len(pos_one_hot), 1)), np.zeros((len(neg_one_hot), 1))])
     names = np.concatenate([pos_names, neg_names])
     names = names.astype("S")
 
