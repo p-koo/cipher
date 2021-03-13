@@ -23,7 +23,9 @@ jobs:
         python -m pip install --upgrade pip setuptools wheel
         # cython is used to build ushuffle.
         python -m pip install --no-cache-dir --upgrade cython
-        python -m pip install --no-cache-dir --editable .[dev]
+        # We install tensorflow separately because tensorflow installation depends on
+        # the environment. Here it is straightforward because there is no GPU.
+        python -m pip install --no-cache-dir --editable .[dev] tensorflow-cpu
         python -m pip install --no-cache-dir codecov
     - name: Lint
       run: flake8 cipher
