@@ -62,8 +62,7 @@ def process_singletask(tf_path, dnase_path, genome_path, data_path, experiment,
             gc_pos = np.sum(f_pos[:, 1:3], axis=1)
             gc_neg = np.sum(f_neg[:, 1:3], axis=1)
 
-            index = wrangle.sample_b_matched_to_a(gc_pos, gc_neg, seed=2)
-            neg_one_hot = neg_one_hot[index]
+            index = wrangle.sample_b_matched_to_a(gc_pos, gc_neg)
         else:
             index = np.random.permutation(len(neg_one_hot))[:len(pos_one_hot)]
         neg_one_hot = neg_one_hot[index]
