@@ -2,7 +2,7 @@
 from tensorflow import keras
 
 
-def cnn_dist_model(input_shape, output_shape, activation='relu', units=[24, 32, 48, 64, 96 ], dropout=[0.1, 0.2, 0.3, 0.4, 0.5]):
+def model(input_shape, output_shape, activation='relu', units=[24, 32, 48, 64, 96 ], dropout=[0.1, 0.2, 0.3, 0.4, 0.5]):
       
 
     """

@@ -6,7 +6,7 @@
 from tensorflow import keras
 
 
-def deepbind_custom(input_shape, output_shape, activation='relu', units=[24, 48], dropout=[0.1, 0.5]):
+def model(input_shape, output_shape, activation='relu', units=[24, 48], dropout=[0.1, 0.5]):
 
 
     """

@@ -6,7 +6,7 @@
 from tensorflow import keras
 
 
-def deepbind(input_shape, output_shape, units=[24, 48], dropout=[0.1, 0.5]):
+def model(input_shape, output_shape, units=[24, 48], dropout=[0.1, 0.5]):
 
     """
     Creates a keras neural network model in the original DeepBind architecture. 

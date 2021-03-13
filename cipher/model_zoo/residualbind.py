@@ -6,7 +6,7 @@ from tensorflow import keras
 
 
 
-def residual_bind(input_shape, output_shape, activation=None, units=[96, 3, 256], dropout=[0.1, 0.2, 0.5], classification=True):
+def model(input_shape, output_shape, activation=None, units=[96, 3, 256], dropout=[0.1, 0.2, 0.5], classification=True):
 
     def residual_block(input_layer, filter_size, activation='relu', dilated=False):
 

@@ -4,7 +4,7 @@
 
 from tensorflow import keras
 
-def cnn_local_model(input_shape, output_shape, activation='relu',  units=[24, 48, 96], dropout=[0.1, 0.2, 0.5]):
+def model(input_shape, output_shape, activation='relu',  units=[24, 48, 96], dropout=[0.1, 0.2, 0.5]):
       
     """
     Creates a keras neural network with the architecture shown below. The architecture is chosen to promote learning in the first layeer.
