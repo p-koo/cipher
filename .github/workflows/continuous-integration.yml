@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -25,8 +25,10 @@ jobs:
         python -m pip install --no-cache-dir codecov
     - name: Lint
       run: flake8 cipher
-    - name: Check types
-      run: mypy cipher
+    # TODO: at the moment, the versions of numpy and pandas we install are not typed.
+    # Let's wait a bit before checking types here or add a multi-version solution.
+    # - name: Check types
+    #   run: mypy cipher
     - name: Run tests
       run: pytest cipher
     - name: Get code coverage
