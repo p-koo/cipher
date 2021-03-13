@@ -24,8 +24,9 @@ jobs:
         # cython is used to build ushuffle.
         python -m pip install --no-cache-dir --upgrade cython
         # We install tensorflow separately because tensorflow installation depends on
-        # the environment. Here it is straightforward because there is no GPU.
-        python -m pip install --no-cache-dir --editable .[dev] tensorflow-cpu
+        # the environment. The current stable version of tensorflow does not support
+        # python 3.9, so we install a specific nightly version.
+        python -m pip install --no-cache-dir --editable .[dev] "tf-nightly-cpu==2.5.0.dev20210312"
         python -m pip install --no-cache-dir codecov
     - name: Lint
       run: flake8 cipher
