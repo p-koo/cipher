@@ -4,6 +4,9 @@ Codebase for the [Koo Lab](https://koolab.cshl.edu/) at Cold Spring Harbor Labor
 
 This is a work in progress.
 
+[![Results of continuous integration](https://github.com/p-koo/cipher/workflows/CI/badge.svg)](https://github.com/p-koo/cipher/actions/workflows/continuous-integration.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/p-koo/cipher)](https://app.codecov.io/gh/p-koo/cipher/branch/master)
+
 # Install
 
 One can install the master branch (the bleeding edge) with `pip`. One must also install
