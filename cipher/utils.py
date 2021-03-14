@@ -1,11 +1,7 @@
 """Useful functions."""
 
 import os
-
-
-# TODO: Function to load tsv to dataframe
-
-# TODO: function to save dataframe to tsv
+import pkgutil
 
 
 def make_directory(dirpath, verbose=1):
@@ -54,3 +50,36 @@ def import_model(model_name):
     # Equivalent of `from model_zoo import model_name as animal` where model_name is evaluated at runtime
     animal = __import__("cipher.model_zoo." + model_name, globals(), locals(), [model_name], 0) 
     return animal
+
+
+
+def list_model_zoo():
+    """List models in cipher.model_zoo.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> list_model_zoo()
+    >>> 
+    """
+
+    # get names of files in model_zoo and filter out files that begin with "__"
+    loader = pkgutil.get_loader(model_zoo)
+    names = []
+    for name in loader.contents():
+        name = name.split('.')[0]
+        if name[:2] != '__':
+            names.append(name)
+    
+    # print to std out
+    print('Model list: ')
+    for name in names:
+        print("    %s"%(name))  
+
