@@ -90,7 +90,7 @@ class Explainer:
 
 
 @tf.function
-def saliency_map(x, model, class_index=None, reducer=tf.math.reduce_mean):
+def saliency_map(x, model, class_index=None, func=tf.math.reduce_mean):
     """Calculate saliency map of input `x` given a TensorFlow Keras model.
 
     Parameters
@@ -101,8 +101,8 @@ def saliency_map(x, model, class_index=None, reducer=tf.math.reduce_mean):
         Any tf.keras model (eg, functional, sequential, sub-classed).
     class_index : int, optional
         The class over which to calculate the saliency map. If omitted, reduces model
-        outputs using `reducer` and then gets saliency map.
-    reducer : callable, optional
+        outputs using `func` and then gets saliency map.
+    func : callable, optional
         Callable that takes in a sequence of values and reduces them to one value.
 
     Returns
@@ -117,12 +117,12 @@ def saliency_map(x, model, class_index=None, reducer=tf.math.reduce_mean):
         if class_index is not None:
             outputs = outputs[:, class_index]
         else:
-            outputs = reducer(outputs)
+            outputs = func(outputs)
     return tape.gradient(outputs, x)
 
 
 @tf.function
-def hessian(x, model, class_index: int = None, reducer=tf.math.reduce_mean):
+def hessian(x, model, class_index: int = None, func=tf.math.reduce_mean):
     """Calculate Hessian.
 
     Parameters
@@ -133,8 +133,8 @@ def hessian(x, model, class_index: int = None, reducer=tf.math.reduce_mean):
         Any tf.keras model (eg, functional, sequential, sub-classed).
     class_index : int, optional
         The class over which to calculate the Hessian. If omitted, reduces model
-        outputs using `reducer` and then gets saliency map.
-    reducer : callable, optional
+        outputs using `func` and then gets saliency map.
+    func : callable, optional
         Callable that takes in a sequence of values and reduces them to one value.
 
     Returns
@@ -151,7 +151,7 @@ def hessian(x, model, class_index: int = None, reducer=tf.math.reduce_mean):
             if class_index is not None:
                 outputs = outputs[:, class_index]
             else:
-                outputs = reducer(outputs)
+                outputs = func(outputs)
         g = tape1.gradient(outputs, x)
     return tape2.jacobian(g, x)
 
@@ -163,7 +163,7 @@ def smoothgrad(
     mean=0.0,
     stddev=0.1,
     class_index=None,
-    reducer=tf.math.reduce_mean,
+    func=tf.math.reduce_mean,
 ):
     """Run smoothgrad on inputs and model.
 
@@ -181,8 +181,8 @@ def smoothgrad(
         Standard deviation of Gaussian noise distribution added to the inputs.
     class_index : int, optional
         The class over which to get saliency maps. If omitted, then model outputs are
-        reduced using `reducer`.
-    reducer : callable, optional
+        reduced using `func`.
+    func : callable, optional
         Callable that takes in a sequence of values and reduces them to one value.
 
     Returns
@@ -197,7 +197,7 @@ def smoothgrad(
     x_noise = tf.tile(x, (num_samples, 1, 1)) + tf.random.normal(
         (num_samples, L, A), mean, stddev
     )
-    grad = saliency_map(x_noise, model, class_index=class_index, reducer=reducer)
+    grad = saliency_map(x_noise, model, class_index=class_index, func=func)
     return tf.reduce_mean(grad, axis=0, keepdims=True)
 
 
@@ -207,7 +207,7 @@ def integrated_grad(
     baseline,
     num_steps=25,
     class_index: int = None,
-    reducer=tf.math.reduce_mean,
+    func=tf.math.reduce_mean,
 ):
     """Calculate integrated gradients on inputs and model.
 
@@ -222,8 +222,8 @@ def integrated_grad(
         ???
     class_index : int, optional
         The class over which to get saliency maps. If omitted, then model outputs are
-        reduced using `reducer`.
-    reducer : callable, optional
+        reduced using `func`.
+    func : callable, optional
         Callable that takes in a sequence of values and reduces them to one value.
 
     Returns
@@ -247,7 +247,7 @@ def integrated_grad(
     x = tf.convert_to_tensor(x)
     steps = tf.linspace(start=0.0, stop=1.0, num=num_steps + 1)
     x_interp = interpolate_data(baseline, x, steps)
-    grad = saliency_map(x_interp, model, class_index=class_index, reducer=reducer)
+    grad = saliency_map(x_interp, model, class_index=class_index, func=func)
     avg_grad = integral_approximation(grad)
     return avg_grad * (x - baseline)
 
@@ -258,7 +258,7 @@ def expected_integrated_grad(
     baselines,
     num_steps=25,
     class_index: int = None,
-    reducer=tf.math.reduce_mean,
+    func=tf.math.reduce_mean,
 ):
     """Average integrated gradients across different backgrounds
 
@@ -278,7 +278,7 @@ def expected_integrated_grad(
                 baseline,
                 num_steps=num_steps,
                 class_index=class_index,
-                reducer=reducer,
+                func=func,
             )
         )
     return np.mean(np.array(grads), axis=0)
