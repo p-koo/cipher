@@ -1,31 +1,24 @@
 import argparse
+
 import pandas as pd
 from tensorflow import keras
+
 from cipher import load
+from cipher.model_zoo import get_model
 
 
 def main(model_name, data_path, args):
 
     # Load data
-    x_train, y_train, x_valid, y_valid, x_test, y_test = load.standard_data(
+    x_train, y_train, x_valid, y_valid, _, _ = load.standard_data(
         data_path, reverse_comp=args.rc
-    )
-
-    # Import model from the zoo as singular animal
-    # equivalent of `from model_zoo import model_name as animal` where model_name is
-    # evaluated at runtime.
-
-    # TODO: this code is difficult to understand. If there is buggy behavior related to
-    # this line, it will be difficult to debug. I propose refactoring this to use a
-    # method that grabs the model function from a dictionary of the known models.
-    animal = __import__(
-        "cipher.model_zoo." + model_name, globals(), locals(), [model_name], 0
     )
 
     # Build model
     num_labels = y_train.shape[1]
     N, L, A = x_train.shape
-    model = animal.model(input_shape=(L, A), output_shape=num_labels)
+    model_fn = get_model(model_name)
+    model = model_fn(input_shape=(L, A), output_shape=num_labels)
 
     # set up optimizer and metrics
     auroc = keras.metrics.AUC(curve="ROC", name="auroc")

@@ -28,7 +28,7 @@ def make_directory(dirpath, verbose=1):
 
 
 def import_model(model_name):
-    """Import a model from model_zoo. 
+    """Import a model from model_zoo.
 
     Parameters
     ----------
@@ -37,7 +37,7 @@ def import_model(model_name):
 
     Returns
     -------
-        imported model 
+        imported model
 
     Examples
     --------
@@ -48,7 +48,9 @@ def import_model(model_name):
 
     # Import model from the zoo as singular animal
     # Equivalent of `from model_zoo import model_name as animal` where model_name is evaluated at runtime
-    animal = __import__("cipher.model_zoo." + model_name, globals(), locals(), [model_name], 0) 
+    animal = __import__(
+        "cipher.model_zoo." + model_name, globals(), locals(), [model_name], 0
+    )
     return animal
 
 
