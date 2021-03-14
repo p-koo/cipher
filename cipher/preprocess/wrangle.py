@@ -10,6 +10,9 @@ import typing
 import numpy as np
 import pandas as pd
 import scipy.stats
+
+# TODO: this is the only dependency that requires a compiler. It does not ship a
+# pre-compiled wheel. Perhaps we can write a python/numpy implementation?
 from ushuffle import shuffle
 
 PathType = typing.Union[str, pathlib.Path]
@@ -91,44 +94,49 @@ def extract_metatable_information(metatable_filtered):
             file_accession_list : <list>
                 List of file acessions in the ENCODE metatable.
             expt_accession_list : <list>
-                List of experiment accessions in the ENCODE metatable. 
+                List of experiment accessions in the ENCODE metatable.
             url_list : <list>
                 List of URLs in the ENCODE metatable.
             audit_warning_list : <list>
                 List of audit warnings in the ENCODE metatable.
     Example
     -------
-    >>> metatable_filtered = filter_encode_metatable(file_path, save_filtered_table=True)
-    >>> tf, cell_type, file_accession, url, audit = extract_table_information(metatable_filtered)
+    >>> metatable_filtered = filter_encode_metatable(
+        file_path, save_filtered_table=True)
+    >>> tf, cell_type, file_accession, url, audit = extract_table_information(
+        metatable_filtered)
     """
 
     metatable_filtered = metatable_filtered[
-                                    ['File accession', 
-                                     'Experiment accession',
-                                     'Biosample term name',
-                                     'Experiment target', 
-                                     'Lab', 
-                                     'File download URL', 
-                                     'Audit WARNING']
-                                            ].copy()
-    metatable_filtered['Experiment target'] = metatable_filtered['Experiment target'].str.split('-', expand=True)[0]
+        [
+            "File accession",
+            "Experiment accession",
+            "Biosample term name",
+            "Experiment target",
+            "Lab",
+            "File download URL",
+            "Audit WARNING",
+        ]
+    ].copy()
+    metatable_filtered["Experiment target"] = metatable_filtered[
+        "Experiment target"
+    ].str.split("-", expand=True)[0]
 
-    index_list = metatable_filtered.index.tolist()
-    tf_list = metatable_filtered['Experiment target'].tolist()
-    cell_type_list = metatable_filtered['Biosample term name'].tolist()
-    file_accession_list = metatable_filtered['File accession'].tolist()
-    expt_accession_list = metatable_filtered['Experiment accession'].tolist()
-    url_list = metatable_filtered['File download URL'].tolist()
-    audit_warning_list = metatable_filtered['Audit WARNING'].tolist()
+    tf_list = metatable_filtered["Experiment target"].tolist()
+    cell_type_list = metatable_filtered["Biosample term name"].tolist()
+    file_accession_list = metatable_filtered["File accession"].tolist()
+    expt_accession_list = metatable_filtered["Experiment accession"].tolist()
+    url_list = metatable_filtered["File download URL"].tolist()
+    audit_warning_list = metatable_filtered["Audit WARNING"].tolist()
 
     res_dict = {
-                'tf_list':tf_list, 
-                'cell_type_list':cell_type_list, 
-                'file_accession_list':file_accession_list,
-                'expt_accession_list':expt_accession_list,
-                'url_list':url_list,
-                'audit_warning_list':audit_warning_list
-                } 
+        "tf_list": tf_list,
+        "cell_type_list": cell_type_list,
+        "file_accession_list": file_accession_list,
+        "expt_accession_list": expt_accession_list,
+        "url_list": url_list,
+        "audit_warning_list": audit_warning_list,
+    }
 
     return res_dict
 
@@ -222,7 +230,7 @@ def enforce_constant_size(bed_path, output_path, window):
     middle = np.round((start + end) / 2).astype(int)
     left_window = np.round(window / 2).astype(int)
     right_window = window - left_window
-    
+
     # calculate new start and end points
     start = middle - left_window
     end = middle + right_window
@@ -667,58 +675,57 @@ def split_dataset(one_hot, labels, valid_frac=0.1, test_frac=0.2):
 
 
 # TODO: split according to chromosome
-def split_dataset_by_chr(one_hot, labels, names, chromosome_test,chromosome_valid):
+def split_dataset_by_chr(one_hot, labels, names, chromosome_test, chromosome_valid):
     """takes list of chromosomes and which split to put them in
-       takes names of peaks and extracts chromosomes
-       
-       Parameters
-       ____________
-       one_hot : < array of one_hot encoded sequences >
-       labels : < array indicating class membership of corresponding sample >
-       names : < array of sequence chromosomal coordinates 
-       chromosome_test : < list of chromosomes to be put in test >
-       chromosome_valid : < list of chromosomes to be put in val > 
+    takes names of peaks and extracts chromosomes
 
-       Returns
-       _____________
-       train,test,validation split and the corresponding indices
-       
-       Example
-       _____________
+    Parameters
+    ____________
+    one_hot : < array of one_hot encoded sequences >
+    labels : < array indicating class membership of corresponding sample >
+    names : < array of sequence chromosomal coordinates
+    chromosome_test : < list of chromosomes to be put in test >
+    chromosome_valid : < list of chromosomes to be put in val >
 
-       
+    Returns
+    _____________
+    train,test,validation split and the corresponding indices
+
+    Example
+    _____________
+
+
 
 
 
     """
     # extracts chromosome from each peak
-    chrs=[x.split(":")[0] for x in names]
+    chrs = [x.split(":")[0] for x in names]
 
-    
-    valid_index=[]
+    valid_index = []
     for i in chromosome_valid:
-      valid_index.extend([x for x in range(len(chrs)) if chrs[x] == i])
+        valid_index.extend([x for x in range(len(chrs)) if chrs[x] == i])
 
-    test_index=[]
+    test_index = []
     for i in chromosome_test:
-      test_index.extend([x for x in range(len(chrs)) if chrs[x] == i])
+        test_index.extend([x for x in range(len(chrs)) if chrs[x] == i])
 
-    
-
-    
     num_data = len(one_hot)
 
     # produce shuffled list of all indices for downstream pruning:
-    shuffle = np.random.permutation(num_data);shuffle=set(shuffle)
+    shuffle = np.random.permutation(num_data)
+    shuffle = set(shuffle)
 
     # defining set of indices not in train:
-    non_train_idx=valid_index;non_train_idx.extend(test_index);non_train_idx=set(non_train_idx)
+    non_train_idx = valid_index
+    non_train_idx.extend(test_index)
+    non_train_idx = set(non_train_idx)
 
     # removing test/valid indices from shuffled data to produce train:
     # takes values in shuffle not in non_train_idx
 
-    train_index=list(shuffle ^ non_train_idx)
-        
+    train_index = list(shuffle ^ non_train_idx)
+
     # split dataset
     train = (one_hot[train_index], labels[train_index, :])
     valid = (one_hot[valid_index], labels[valid_index, :])
@@ -730,20 +737,19 @@ def split_dataset_by_chr(one_hot, labels, names, chromosome_test,chromosome_vali
 
 def shuffle_onehot(one_hot, k=1):
     """Shuffle one-hot represented sequences while preserving k-let frequencies.
-    
+
     Parameters
     ----------
-    one_hot : numpy.ndarray
-        One_hot encoded sequence with shape (N, L, A)
-    k : int
-        k of k-let frequencies to preserve (e.g., with k = 2, dinucleotide
-        shuffle is performed); default is k = 1 (i.e., single-nucleotide
-        shuffle)
+    one_hot : np.ndarray
+        One_hot encoded sequence with shape (N, L, A).
+    k : int, optional
+        k of k-let frequencies to preserve. For example, with k = 2, dinucleotide
+        shuffle is performed. The default is k = 1 (i.e., single-nucleotide shuffle).
 
     Returns
     -------
-    Numpy array of one-hot represented shuffled sequences, of the same shape
-    as one_hot.
+    np.ndarray
+        One-hot represented shuffled sequences, of the same shape as one_hot.
 
     Examples
     --------
@@ -771,9 +777,9 @@ def shuffle_onehot(one_hot, k=1):
             [0., 1., 0., 0.],
             [0., 0., 0., 1.]]])
     """
-    
+
     if k == 1:
-        L = one_hot.shape[1] # one_hot has shape (N, L, A)
+        L = one_hot.shape[1]  # one_hot has shape (N, L, A)
         rng = np.random.default_rng()
         one_hot_shuffled = []
 
@@ -785,40 +791,42 @@ def shuffle_onehot(one_hot, k=1):
         one_hot_shuffled = np.array(one_hot_shuffled)
 
         return one_hot_shuffled
-    
+
     elif k >= 2:
-        seqs = [seq.str.cat() for seq in convert_onehot_to_sequence(one_hot)] # convert one_hot to pandas Series of letters, then string letters together (for each Series)
+        # convert one_hot to pandas Series of letters, then string letters together
+        # (for each Series)
+        seqs = [seq.str.cat() for seq in convert_onehot_to_sequence(one_hot)]
         seqs_shuffled = []
-    
+
         for i, seq in enumerate(seqs):
             seq = seq.upper()
-            seq_shuffled = shuffle( bytes(seq, "utf-8") , k).decode("utf-8") # dinucleotide shuffle
+            # dinucleotide shuffle
+            seq_shuffled = shuffle(bytes(seq, "utf-8"), k).decode("utf-8")
 
             seqs_shuffled.append(seq_shuffled)
 
         one_hot_shuffled = convert_one_hot(seqs_shuffled)
         return one_hot_shuffled
-    
+
     else:
         raise ValueError("k must be an integer greater than or equal to 1")
 
-        
+
 def shuffle_sequences(sequences, k=1):
     """Shuffle one-hot represented sequences while preserving k-let frequencies.
-    
+
     Parameters
     ----------
-    one_hot : numpy.ndarray
+    one_hot : np.ndarray
         One_hot encoded sequence with shape (N, L, A)
-    k : int
-        k of k-let frequencies to preserve (e.g., with k = 2, dinucleotide
-        shuffle is performed); default is k = 1 (i.e., single-nucleotide
-        shuffle)
+    k : int, optional
+        k of k-let frequencies to preserve. For example, with k = 2, dinucleotide
+        shuffle is performed. The default is k = 1 (i.e., single-nucleotide shuffle).
 
     Returns
     -------
-    Numpy array of one-hot represented shuffled sequences, of the same shape
-    as one_hot.
+    np.ndarray
+        One-hot represented shuffled sequences, of the same shape as one_hot.
 
     Examples
     --------
@@ -831,7 +839,7 @@ def shuffle_sequences(sequences, k=1):
 
     for i, seq in enumerate(sequences):
         seq = seq.upper()
-        seq_shuffled = shuffle( bytes(seq, "utf-8") , k).decode("utf-8")
+        seq_shuffled = shuffle(bytes(seq, "utf-8"), k).decode("utf-8")
 
         sequences_shuffled.append(seq_shuffled)
 

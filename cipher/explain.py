@@ -89,7 +89,7 @@ class Explainer:
         return baseline
 
 
-# @tf.function
+@tf.function
 def saliency_map(x, model, class_index=None, reducer=tf.math.reduce_mean):
     """Calculate saliency map of input `x` given a TensorFlow Keras model.
 
@@ -121,7 +121,7 @@ def saliency_map(x, model, class_index=None, reducer=tf.math.reduce_mean):
     return tape.gradient(outputs, x)
 
 
-# @tf.function
+@tf.function
 def hessian(x, model, class_index: int = None, reducer=tf.math.reduce_mean):
     """Calculate Hessian.
 
@@ -278,7 +278,7 @@ def expected_integrated_grad(
                 baseline,
                 num_steps=num_steps,
                 class_index=class_index,
-                reducer=tf.math.reduce_mean,
+                reducer=reducer,
             )
         )
     return np.mean(np.array(grads), axis=0)
