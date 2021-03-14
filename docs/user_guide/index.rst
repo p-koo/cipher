@@ -7,3 +7,5 @@ User Guide
     will be added as documentation.
 
 .. toctree::
+
+    tutorial_multitask
