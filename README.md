@@ -35,12 +35,11 @@ python -m pip install --no-cache-dir --upgrade pip setuptools wheel
 python -m pip install --no-cache-dir --editable .[dev] tensorflow
 ```
 
-## Code formatting
+It is also useful to use `pre-commit` to run the styler (`black`) and lint the code on
+every commit.
 
-Format your code with `black`.
-
-```bash
-black cipher
+```
+pre-commit
 ```
 
 ## Running tests
