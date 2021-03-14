@@ -1,6 +1,8 @@
 """Useful functions."""
 
 import os
+import numpy as np
+import pandas as pd
 import pkgutil
 
 # TODO: this is the only dependency that requires a compiler. It does not ship a
@@ -90,6 +92,142 @@ def list_model_zoo():
 
 
 
+
+def convert_one_hot(sequences, alphabet="ACGT") -> np.ndarray:
+    """Convert flat array of sequences to one-hot representation.
+
+    **Important**: all letters in `sequences` *must* be contained in `alphabet`, and
+    all sequences must have the same length.
+
+    Parameters
+    ----------
+    sequences : numpy.ndarray of strings
+        The array of strings. Should be one-dimensional.
+    alphabet : str
+        The alphabet of the sequences.
+
+    Returns
+    -------
+    Numpy array of sequences in one-hot representation. The shape of this array is
+    `(len(sequences), len(sequences[0]), len(alphabet))`.
+
+    Examples
+    --------
+    >>> one_hot(["TGCA"], alphabet="ACGT")
+    array([[[0., 0., 0., 1.],
+            [0., 0., 1., 0.],
+            [0., 1., 0., 0.],
+            [1., 0., 0., 0.]]])
+    """
+    sequences = np.asanyarray(sequences)
+    if sequences.ndim != 1:
+        raise ValueError("array of sequences must be one-dimensional.")
+    n_sequences = sequences.shape[0]
+    sequence_len = len(sequences[0])
+
+    # Unpack strings into 2D array, where each point has one character.
+    s = np.zeros((n_sequences, sequence_len), dtype="U1")
+    for i in range(n_sequences):
+        s[i] = list(sequences[i])
+
+    # Make an integer array from the string array.
+    pre_onehot = np.zeros(s.shape, dtype=np.uint8)
+    for i, letter in enumerate(alphabet):
+        # do nothing on 0 because array is initialized with zeros.
+        if i:
+            pre_onehot[s == letter] = i
+
+    # create one-hot representation
+    n_classes = len(alphabet)
+    return np.eye(n_classes)[pre_onehot]
+
+
+def convert_onehot_to_sequence(one_hot, alphabet="ACGT"):
+    """Convert DNA/RNA sequences from one-hot representation to
+    string representation.
+
+    Parameters
+    ----------
+    one_hot : <numpy.ndarray>
+        one_hot encoded sequence with shape (N, L, A)
+    alphabet : <str>
+        DNA = 'ACGT'
+
+    Returns
+    -------
+    sequences : <numpy.ndarray>
+    A numpy vector of sequences in string representation.
+
+    Example
+    -------
+    >>> one_hot = np.array(
+            [[[1., 0., 0., 0.],
+            [1., 0., 0., 0.],
+            [0., 0., 1., 0.],
+            [1., 0., 0., 0.],
+            [0., 1., 0., 0.]],
+
+            [[0., 0., 0., 1.],
+            [0., 1., 0., 0.],
+            [0., 0., 1., 0.],
+            [0., 1., 0., 0.],
+            [1., 0., 0., 0.]]]
+                )
+    >>> sequences = convert_onehot_to_sequence(one_hot)
+    >>> sequences
+    array([['A', 'A', 'G', 'A', 'C'],
+       ['T', 'C', 'G', 'C', 'A']], dtype=object)
+    """
+    assert alphabet in ["ACGT", "ACGU"], "Enter a valid alphabet"
+
+    # convert alphabet to dictionary
+    alphabet_dict = {i: a for i, a in enumerate(list(alphabet))}
+
+    # get indices of one-hot
+    seq_indices = np.argmax(one_hot, axis=2)  # (N, L)
+
+    # convert index to sequence
+    sequences = []
+    for seq_index in seq_indices:
+        seq = pd.Series(seq_index).map(alphabet_dict)
+        sequences.append(seq)
+    return np.asarray(sequences)
+
+
+def filter_nonsense_sequences(sequences):
+    """Filter sequences with N.
+
+    Parameters
+    ----------
+    sequences : <numpy.ndarray>
+        A numpy vector of sequence strings.
+
+    Returns
+    -------
+    filter_sequences : <numpy.ndarray>
+        The parsed sequences from the input fasta file as a numpy array of sequences.
+    good_index : <numpy.ndarray>
+        A numpy array of indices corresponding to sequences without nonsense 'N'
+        entries.
+
+    Example
+    -------
+    >>> print(sequences)
+    ['GGCTGAAATGGCCACTGGAA' 'ACGCTCTCTCATCAAGTGGT' 'GCAGAANANCGAACACCAAC'
+    'NNCNNCANCNACNGGGGAAC' 'GCCTAGTCCAGACATAATTC']
+    >>> print(filter_nonsense_sequences(sequences))
+    (array(['GGCTGAAATGGCCACTGGAA', 'ACGCTCTCTCATCAAGTGGT',
+            'GCCTAGTCCAGACATAATTC'], dtype='<U20'), array([0, 1, 4]))
+    """
+
+    # filter sequences if contains at least one 'N' character
+    good_index = []
+    filter_sequences = []
+    for i, seq in enumerate(sequences):
+        if "N" not in seq.upper():
+            good_index.append(i)
+            filter_sequences.append(seq)
+    return np.array(filter_sequences), np.array(good_index)
 
 def shuffle_onehot(one_hot, k=1):
     """Shuffle one-hot represented sequences while preserving k-let frequencies.
@@ -200,4 +338,6 @@ def shuffle_sequences(sequences, k=1):
         sequences_shuffled.append(seq_shuffled)
 
     return sequences_shuffled
+
+
 
