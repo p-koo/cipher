@@ -35,7 +35,7 @@ from seq_hdf5 import make_h5
 
 def main():
     parser = OptionParser()
-    parser.add_option('--feature_size',dest = 'feature_size',default = 1000,help='length of selected sequence regions')
+    parser.add_option('--feature_size',dest = 'feature_size',default = 1000, type='int', help='length of selected sequence regions')
     parser.add_option('--fasta',dest = 'fasta',help='length of selected sequence regions')
     parser.add_option('--output', dest='h5_output', default ='output.h5', help='Directory for output h5 file. Default to current directory')
     parser.add_option('--sample_output', dest='exp_output', default ='sample_beds.txt', help='Directory for output sample file. Default to current directory')
@@ -47,7 +47,11 @@ def main():
     parser.add_option('--subset', dest='subset_output',default = 'selected_data.csv',help='path where the subset of metadata table used will be saved as a to_csv')
     parser.add_option('--criteria', dest='criteria', default = {} ,help='dictionary of column, value pairs to use in making a selection')
     parser.add_option('--exp_accession_list', dest='exp_accession',default=None, help='List of experiments to select, if empty select all in the metadata table')
-    parser.add_option('--merge_overlap',dest = 'overlap',default=200, help='if two peak regions overlaps more than this amount, they will be re-centered and merged into a single sample')
+    parser.add_option('--merge_overlap',dest = 'overlap',default=200, type='int', help='if two peak regions overlaps more than this amount, they will be re-centered and merged into a single sample')
+    parser.add_option('--seed',dest = 'seed',default=42, type='int', help='random split for data shuffle')
+    parser.add_option('--valid_frac',dest = 'valid_pct',default=0.1, type='float', help='fraction of data allocated to the validation set')
+    parser.add_option('--test_frac',dest = 'test_pct',default=0.1, type='float', help='fraction of data allocated to the test set')
+
     (options,args) = parser.parse_args()
     if len(args) != 2:
         parser.error('Must provide data directory and metadata table path.')
@@ -63,12 +67,16 @@ def main():
                       criteria=options.criteria,
                       exp_accession_list=options.exp_accession)
 
-    multitask_bed_generation(options.exp_output,chrom_lengths_file=options.chrom_size,
-                            feature_size=options.feature_size,merge_overlap=options.overlap,
+    multitask_bed_generation(options.exp_output, chrom_lengths_file=options.chrom_size,
+                            feature_size=options.feature_size, merge_overlap=options.overlap,
                              out_prefix=options.bed_output)
 
-    subprocess.call('bedtools getfasta -fi {} -s -bed {} -fo {}'.format(options.fasta,options.bed_output+'.bed',options.fa_output), shell=True)
-    make_h5(options.fa_output, options.bed_output+'_act.txt',options.h5_output,options.header_output)
+    subprocess.call('bedtools getfasta -fi {} -s -bed {} -fo {}'.format(options.fasta,
+                                                                        options.bed_output+'.bed',
+                                                                        options.fa_output), shell=True)
+    make_h5(options.fa_output, options.bed_output+'_act.txt', options.h5_output,
+            options.header_output, random_seed=options.seed,
+            test_pct=options.test_pct, valid_pct=options.valid_pct)
 
 
 if __name__ == "__main__":
