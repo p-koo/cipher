@@ -4,9 +4,12 @@ from tensorflow import keras
 def model(
     input_shape,
     output_shape,
-    activation=None,
-    units=[96, 3, 256],
+    kernel_size=19,
+    activation='relu',
+    pool_size=10,
+    units=[96, 256],
     dropout=[0.1, 0.2, 0.5],
+    dilated=True,
     classification=True,
 ):
     def residual_block(input_layer, filter_size, activation="relu", dilated=False):
@@ -48,21 +51,21 @@ def model(
     # layer 1
     nn = keras.layers.Conv1D(
         filters=units[0],
-        kernel_size=11,
+        kernel_size=kernel_size,
         strides=1,
         activation=None,
         use_bias=False,
         padding="same",
     )(inputs)
     nn = keras.layers.BatchNormalization()(nn)
-    nn = keras.layers.Activation("relu")(nn)
+    nn = keras.layers.Activation(activation)(nn)
     nn = keras.layers.Dropout(dropout[0])(nn)
 
     # dilated residual block
-    nn = residual_block(nn, filter_size=units[1], dilated=True)
+    nn = residual_block(nn, filter_size=3, dilated=dilated)
 
     # average pooling
-    nn = keras.layers.AveragePooling1D(pool_size=10)(nn)
+    nn = keras.layers.AveragePooling1D(pool_size=pool_size)(nn)
     nn = keras.layers.Dropout(dropout[1])(nn)
 
     # Fully-connected NN
@@ -73,7 +76,7 @@ def model(
     nn = keras.layers.Dropout(dropout[2])(nn)
 
     # output layer
-    outputs = keras.layers.Dense(output_shape, activation="linear", use_bias=True)(nn)
+    outputs = keras.layers.Dense(output_shape, activation=None, use_bias=True)(nn)
 
     if classification:
         outputs = keras.layers.Activation("sigmoid")(outputs)

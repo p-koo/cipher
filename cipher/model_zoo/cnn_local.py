@@ -6,6 +6,7 @@ def model(
     output_shape,
     activation="relu",
     units=[24, 48, 96],
+    pool_size=[25, 4],
     dropout=[0.1, 0.2, 0.5],
 ):
     """Creates a keras neural network with the architecture shown below. The
@@ -51,19 +52,19 @@ def model(
     )(inputs)
     nn = keras.layers.BatchNormalization()(nn)
     nn = keras.layers.Dropout(dropout[0])(nn)
-    nn = keras.layers.MaxPool1D(pool_size=50)(nn)
+    nn = keras.layers.MaxPool1D(pool_size=pool_size[0])(nn)
 
     # layer 2
     nn = keras.layers.Conv1D(
         filters=units[1],
-        kernel_size=3,
+        kernel_size=7,
         padding="same",
         activation="relu",
         kernel_regularizer=keras.regularizers.l2(1e-6),
     )(nn)
     nn = keras.layers.BatchNormalization()(nn)
     nn = keras.layers.Dropout(dropout[1])(nn)
-    nn = keras.layers.MaxPool1D(pool_size=2)(nn)
+    nn = keras.layers.MaxPool1D(pool_size=pool_size[1])(nn)
 
     # layer 3
     nn = keras.layers.Flatten()(nn)
@@ -76,7 +77,7 @@ def model(
     nn = keras.layers.Dropout(dropout[2])(nn)
 
     # Output layer
-    logits = keras.layers.Dense(output_shape, activation="linear", use_bias=True)(nn)
+    logits = keras.layers.Dense(output_shape, activation=None, use_bias=True)(nn)
     outputs = keras.layers.Activation("sigmoid")(logits)
 
     # compile model
