@@ -40,6 +40,7 @@ def main():
         "--feature_size",
         dest="feature_size",
         default=1000,
+	type='int',
         help="length of selected sequence regions",
     )
     parser.add_option(
