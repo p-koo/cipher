@@ -104,13 +104,36 @@ def main():
         help="List of experiments to select, if empty select all in the metadata table",
     )
     parser.add_option(
+	    "--seed", 
+	    dest="seed", 
+	    default=42, 
+	    type="int", 
+	    help="random split for data shuffle"
+    )
+    parser.add_option(
+	    "--valid_frac", 
+	    dest="valid_pct", 
+	    default=0.1, 
+	    type="float", 
+	    help="fraction of data allocated to the validation set"
+    )
+    parser.add_option(
+	    '--test_frac', 
+	    dest = 'test_pct', 
+	    default=0.1, 
+	    type='float', 
+	    help='fraction of data allocated to the test set'
+    )
+	
+    parser.add_option(
         "--merge_overlap",
         dest="overlap",
         default=200,
-        help=(
+	type='int',
+        help=
             "if two peak regions overlaps more than this amount, they will be"
             " re-centered and merged into a single sample"
-        ),
+        
     )
     (options, args) = parser.parse_args()
     if len(args) != 2:
@@ -151,6 +174,9 @@ def main():
         options.bed_output + "_act.txt",
         options.h5_output,
         options.header_output,
+	random_seed=options.seed,
+	test_pct=options.test_pct,
+	valid_pct=options.valid_pct
     )
 
 
