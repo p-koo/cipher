@@ -8,13 +8,13 @@ import typing
 import numpy as np
 import pytest
 
-from cipher.preprocess.wrangle import _is_gzipped
-from cipher.preprocess.wrangle import filter_max_length
-from cipher.preprocess.wrangle import enforce_constant_size
-from cipher.preprocess.wrangle import parse_fasta
-from cipher.preprocess.wrangle import convert_one_hot
-from cipher.preprocess.wrangle import convert_onehot_to_sequence
-from cipher.preprocess.wrangle import filter_nonsense_sequences
+from cipher.preprocess.singletask import _is_gzipped
+from cipher.preprocess.singletask import filter_max_length
+from cipher.preprocess.singletask import enforce_constant_size
+from cipher.preprocess.singletask import parse_fasta
+from cipher.preprocess.singletask import convert_one_hot
+from cipher.preprocess.singletask import convert_onehot_to_sequence
+from cipher.preprocess.singletask import filter_nonsense_sequences
 
 
 def test__is_gzipped(tmp_path: pathlib.Path):

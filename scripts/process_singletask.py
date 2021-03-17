@@ -34,7 +34,7 @@ import os
 import h5py
 import numpy as np
 
-from .preprocess import wrangle
+from .preprocess import singletask
 
 
 def main(args):
@@ -59,56 +59,56 @@ def main(args):
 
     # remove extremely large peaks
     tf_filtered_path = os.path.join(data_path, experiment + "_pos_filtered.bed")
-    wrangle.filter_max_length(tf_path, tf_filtered_path, max_len)
+    singletask.filter_max_length(tf_path, tf_filtered_path, max_len)
 
     # create new bed file with window size enforced
     pos_bed_path = os.path.join(data_path, experiment + "_pos_" + str(window) + ".bed")
-    wrangle.enforce_constant_size(tf_filtered_path, pos_bed_path, window)
+    singletask.enforce_constant_size(tf_filtered_path, pos_bed_path, window)
 
     # extract sequences from bed file and save to fasta file
     pos_fasta_path = os.path.join(data_path, experiment + "_pos.fa")
-    wrangle.bedtools_getfasta(
+    singletask.bedtools_getfasta(
         pos_bed_path, genome_path, output_path=pos_fasta_path, strand=True
     )
 
     # parse sequence from fasta file
-    pos_seq, pos_names = wrangle.parse_fasta(pos_fasta_path)
+    pos_seq, pos_names = singletask.parse_fasta(pos_fasta_path)
 
     # filter sequences with absent nucleotides
-    pos_seq, good_index = wrangle.filter_nonsense_sequences(pos_seq)
+    pos_seq, good_index = singletask.filter_nonsense_sequences(pos_seq)
     pos_names = pos_names[good_index]
 
     # convert filtered sequences to one-hot representation
-    pos_one_hot = wrangle.convert_one_hot(pos_seq, alphabet)
+    pos_one_hot = singletask.convert_one_hot(pos_seq, alphabet)
 
     # get non-overlap between pos peaks and neg peaks
     neg_bed_path = os.path.join(data_path, experiment + "_nonoverlap.bed")
-    wrangle.bedtools_intersect(
+    singletask.bedtools_intersect(
         dnase_path, tf_path, neg_bed_path, write_a=True, nonoverlap=True
     )
 
     # create new bed file with window enforced
     neg_bed_path2 = os.path.join(data_path, experiment + "_neg_" + str(window) + ".bed")
-    wrangle.enforce_constant_size(neg_bed_path, neg_bed_path2, window)
+    singletask.enforce_constant_size(neg_bed_path, neg_bed_path2, window)
 
     # extract sequences from bed file and save to fasta file
     neg_fasta_path = os.path.join(data_path, experiment + "_neg.fa")
-    wrangle.bedtools_getfasta(
+    singletask.bedtools_getfasta(
         neg_bed_path2, genome_path, output_path=neg_fasta_path, strand=True
     )
 
     # parse sequence and chromosome from fasta file
-    neg_seq, neg_names = wrangle.parse_fasta(neg_fasta_path)
+    neg_seq, neg_names = singletask.parse_fasta(neg_fasta_path)
 
     # filter sequences with absent nucleotides
-    neg_seq, good_index = wrangle.filter_nonsense_sequences(neg_seq)
+    neg_seq, good_index = singletask.filter_nonsense_sequences(neg_seq)
     neg_names = neg_names[good_index]
 
     # convert filtered sequences to one-hot representation
-    neg_one_hot = wrangle.convert_one_hot(neg_seq, alphabet)
+    neg_one_hot = singletask.convert_one_hot(neg_seq, alphabet)
 
     # calling match_gc function to balance neg sequences with pos by GC content:
-    neg_one_hot_gc, gc_index = wrangle.match_gc(pos_one_hot, neg_one_hot)
+    neg_one_hot_gc, gc_index = singletask.match_gc(pos_one_hot, neg_one_hot)
     neg_names = neg_names[gc_index]
 
     # merge postive and negative sequences
@@ -120,7 +120,7 @@ def main(args):
     names = names.astype("S")
 
     # shuffle indices for train, validation, and test sets
-    train, valid, test, indices = wrangle.split_dataset(
+    train, valid, test, indices = singletask.split_dataset(
         one_hot, labels, valid_frac=valid_frac, test_frac=test_frac
     )
 

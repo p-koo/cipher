@@ -31,9 +31,7 @@ exp_accession_list:list
 from optparse import OptionParser
 import subprocess
 
-from .metadata_to_samplefile import create_samplefile
-from .bed_generation import multitask_bed_generation
-from .seq_hdf5 import make_h5
+from cipher.preprocess import multitask
 
 
 def main():
@@ -121,7 +119,7 @@ def main():
         metadata_path = args[1]
 
     # call package functiond
-    create_samplefile(
+    multitask.create_samplefile(
         data_dir,
         metadata_path,
         assembly=options.g_assembly,
@@ -131,7 +129,7 @@ def main():
         exp_accession_list=options.exp_accession,
     )
 
-    multitask_bed_generation(
+    multitask.multitask_bed_generation(
         options.exp_output,
         chrom_lengths_file=options.chrom_size,
         feature_size=options.feature_size,
@@ -146,7 +144,8 @@ def main():
         ),
         shell=True,
     )
-    make_h5(
+
+    multitask.make_h5(
         options.fa_output,
         options.bed_output + "_act.txt",
         options.h5_output,

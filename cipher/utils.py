@@ -194,41 +194,6 @@ def convert_onehot_to_sequence(one_hot, alphabet="ACGT"):
     return np.asarray(sequences)
 
 
-def filter_nonsense_sequences(sequences):
-    """Filter sequences with N.
-
-    Parameters
-    ----------
-    sequences : <numpy.ndarray>
-        A numpy vector of sequence strings.
-
-    Returns
-    -------
-    filter_sequences : <numpy.ndarray>
-        The parsed sequences from the input fasta file as a numpy array of sequences.
-    good_index : <numpy.ndarray>
-        A numpy array of indices corresponding to sequences without nonsense 'N'
-        entries.
-
-    Example
-    -------
-    >>> print(sequences)
-    ['GGCTGAAATGGCCACTGGAA' 'ACGCTCTCTCATCAAGTGGT' 'GCAGAANANCGAACACCAAC'
-    'NNCNNCANCNACNGGGGAAC' 'GCCTAGTCCAGACATAATTC']
-    >>> print(filter_nonsense_sequences(sequences))
-    (array(['GGCTGAAATGGCCACTGGAA', 'ACGCTCTCTCATCAAGTGGT',
-            'GCCTAGTCCAGACATAATTC'], dtype='<U20'), array([0, 1, 4]))
-    """
-
-    # filter sequences if contains at least one 'N' character
-    good_index = []
-    filter_sequences = []
-    for i, seq in enumerate(sequences):
-        if "N" not in seq.upper():
-            good_index.append(i)
-            filter_sequences.append(seq)
-    return np.array(filter_sequences), np.array(good_index)
-
 def shuffle_onehot(one_hot, k=1):
     """Shuffle one-hot represented sequences while preserving k-let frequencies.
 

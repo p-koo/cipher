@@ -1,8 +1,9 @@
 import numpy as np
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
 
-from . import moana
-
+#------------------------------------------------------------------------
+# Attribution analysis  
+#------------------------------------------------------------------------
 
 def interpretability_performance(scores, x_model, threshold=0.01):
     """Compare attribution scores to ground truth (e.g. x_model).
@@ -73,32 +74,12 @@ def signal_noise_stats(scores, x_model, top_k=10, threshold=0.01):
     )
 
 
-def motif_comparison_synthetic_dataset(file_path, num_filters=32):
-    """Compares tomtom analysis for filters trained on synthetic multitask
-    classification.
+#------------------------------------------------------------------------
+# Filter analysis  
+#------------------------------------------------------------------------
 
-    Tested with Tomtom version 5.1.0.
 
-    Parameters
-    ----------
-    file_path : str
-        TSV file output from tomtom analysis.
-    num_filters : int
-        Number of filters in conv layer (needed to normalize. Tomtom does not always
-        give results for every filter.
-
-    Returns
-    -------
-    tuple with the following items
-
-        - match_fraction: fraction of hits to ground truth motifs.
-        - match_any: fraction of hits to any motif in JASPAR (except Gremb1).
-        - filter_match: the motif of the best hit (to a ground truth motif).
-        - filter_qvalue: the q-value of the best hit to a ground truth motif.
-            (1.0 means no hit).
-        - motif_qvalue: for each ground truth motif, gives the best qvalue hit.
-        - motif_counts for each ground truth motif, gives number of filter hits.
-    """
+def synthetic_multiclass_motifs():
 
     arid3 = ["MA0151.1", "MA0601.1", "PB0001.1"]
     cebpb = ["MA0466.1", "MA0466.2"]
@@ -112,8 +93,8 @@ def motif_comparison_synthetic_dataset(file_path, num_filters=32):
     srf = ["MA0083.1", "MA0083.2", "MA0083.3"]
     stat1 = ["MA0137.1", "MA0137.2", "MA0137.3", "MA0660.1", "MA0773.1"]
     yy1 = ["MA0095.1", "MA0095.2"]
+    motif_ids = [arid3, cebpb, fosl1, gabpa, mafk, max1, mef2a, nfyb, sp1, srf, stat1, yy1]
 
-    motifs = [arid3, cebpb, fosl1, gabpa, mafk, max1, mef2a, nfyb, sp1, srf, stat1, yy1]
     motif_names = [
         "Arid3",
         "CEBPB",
@@ -128,22 +109,104 @@ def motif_comparison_synthetic_dataset(file_path, num_filters=32):
         "STAT1",
         "YY1",
     ]
-    (
-        match_fraction,
-        match_any,
-        filter_match,
-        filter_qvalue,
-        min_qvalue,
-        num_counts,
-    ) = moana.match_hits_to_ground_truth(file_path, motifs, motif_names, num_filters)
+    return motif_names, motif_ids
 
-    # TODO: consider using a namedtuple here to make it more explicit to the user what
-    # each value represents.
+
+
+def match_hits_to_ground_truth(file_path, motif_names, motif_ids, num_filters=32):
+    """works with Tomtom version 5.1.0
+    inputs:
+        - file_path: .tsv file output from tomtom analysis
+        - motif_ids: list of list of JASPAR ids
+        - motif_names: name of motifs in the list
+        - num_filters: number of filters in conv layer (needed to normalize -- tomtom
+            doesn't always give results for every filter)
+
+    outputs:
+        - match_fraction: fraction of hits to ground truth motifs
+        - match_any: fraction of hits to any motif in JASPAR (except Gremb1)
+        - filter_match: the motif of the best hit (to a ground truth motif)
+        - filter_qvalue: the q-value of the best hit to a ground truth motif
+            (1.0 means no hit)
+        - motif_qvalue: for each ground truth motif, gives the best qvalue hit
+        - motif_counts for each ground truth motif, gives number of filter hits
+    """
+
+    # add a zero for indexing no hits
+    motif_ids = motif_ids.copy()
+    motif_names = motif_names.copy()
+    motif_ids.insert(0, [""])
+    motif_names.insert(0, "")
+
+    # get dataframe for tomtom results
+    df = pd.read_csv(file_path, delimiter="\t")
+
+    # loop through filters
+    filter_qvalue = np.ones(num_filters)
+    best_match = np.zeros(num_filters).astype(int)
+    correction = 0
+    for name in np.unique(df["Query_ID"][:-3].to_numpy()):
+        filter_index = int(name.split("r")[1])
+
+        # get tomtom hits for filter
+        subdf = df.loc[df["Query_ID"] == name]
+        targets = subdf["Target_ID"].to_numpy()
+
+        # loop through ground truth motifs
+        for k, motif_id in enumerate(motif_ids):
+
+            # loop through variations of ground truth motif
+            for id in motif_id:
+
+                # check if there is a match
+                index = np.where(targets == id)[0]
+                if len(index) > 0:
+                    qvalue = subdf["q-value"].to_numpy()[index]
+
+                    # check to see if better motif hit, if so, update
+                    if filter_qvalue[filter_index] > qvalue:
+                        filter_qvalue[filter_index] = qvalue
+                        best_match[filter_index] = k
+
+        # dont' count hits to Gmeb1 (because too many)
+        index = np.where(targets == "MA0615.1")[0]
+        if len(index) > 0:
+            if len(targets) == 1:
+                correction += 1
+
+    # get names of best match motifs
+    filter_match = [motif_names[i] for i in best_match]
+
+    # get hits to any motif
+    # 3 is correction because of last 3 lines of comments in the tsv file (may change
+    # across tomtom versions)
+    num_matches = len(np.unique(df["Query_ID"])) - 3.0
+    # counts hits to any motif (not including Grembl)
+    match_any = (num_matches - correction) / num_filters
+
+    # match fraction to ground truth motifs
+    match_index = np.where(filter_qvalue != 1.0)[0]
+    if any(match_index):
+        match_fraction = len(match_index) / float(num_filters)
+    else:
+        match_fraction = 0.0
+
+    # get the number of hits and minimum q-value for each motif
+    num_motifs = len(motif_ids) - 1
+    motif_qvalue = np.zeros(num_motifs)
+    motif_counts = np.zeros(num_motifs)
+    for i in range(num_motifs):
+        index = np.where(best_match == i + 1)[0]
+        if len(index) > 0:
+            motif_qvalue[i] = np.min(filter_qvalue[index])
+            motif_counts[i] = len(index)
+
+    # TODO: consider changing this to a namedtuple to make the output explicit.
     return (
         match_fraction,
         match_any,
         filter_match,
         filter_qvalue,
-        min_qvalue,
-        num_counts,
+        motif_qvalue,
+        motif_counts,
     )
