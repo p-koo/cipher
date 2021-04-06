@@ -31,7 +31,7 @@ exp_accession_list:list
 from optparse import OptionParser
 import subprocess
 
-from cipher.preprocess import multitask
+from libre.preprocess import multitask
 
 
 def main():

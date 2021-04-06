@@ -1,5 +1,4 @@
 from . import attack  # noqa: F401
-from . import evaluate_synthetic  # noqa: F401
 from . import explain  # noqa: F401
 from . import impress  # noqa: F401
 from . import layers  # noqa: F401
@@ -7,5 +6,6 @@ from . import load  # noqa: F401
 from . import metrics  # noqa: F401
 from . import moana  # noqa: F401
 from . import model_zoo  # noqa: F401
+from . import synthetic  # noqa: F401
 from . import preprocess  # noqa: F401
 from . import utils  # noqa: F401

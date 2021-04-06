@@ -3,8 +3,7 @@ import argparse
 import pandas as pd
 from tensorflow import keras
 
-from cipher import load
-from cipher.model_zoo import get_model
+from libre import load, model_zoo
 
 
 def main(model_name, data_path, args):
@@ -17,7 +16,7 @@ def main(model_name, data_path, args):
     # Build model
     num_labels = y_train.shape[1]
     N, L, A = x_train.shape
-    model_fn = get_model(model_name)
+    model_fn = model_zoo.get_model(model_name)
     model = model_fn(input_shape=(L, A), output_shape=num_labels)
 
     # set up optimizer and metrics

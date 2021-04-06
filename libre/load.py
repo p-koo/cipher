@@ -28,7 +28,6 @@ def standard_data(filepath, reverse_comp=False):
         # TODO: dtype can be set in the `np.array` call. Doing that might avoid an
         # unnecessary copy (but perhaps not).
         x_train = np.array(dataset["x_train"]).astype(np.float32)
-        # TODO: should y_train be cast to float32?
         y_train = np.array(dataset["y_train"]).astype(np.float32)
         x_valid = np.array(dataset["x_valid"]).astype(np.float32)
         y_valid = np.array(dataset["y_valid"]).astype(np.int32)
@@ -53,4 +52,3 @@ def standard_data(filepath, reverse_comp=False):
     return x_train, y_train, x_valid, y_valid, x_test, y_test
 
 
-# TODO: def multi_task(filepath):

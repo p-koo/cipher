@@ -34,7 +34,7 @@ import os
 import h5py
 import numpy as np
 
-from .preprocess import singletask
+from libre.preprocess import singletask
 
 
 def main(args):

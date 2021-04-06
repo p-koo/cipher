@@ -1,11 +1,11 @@
-# Cipher
+# LIBRE -- Learning Interpretable Biological REpresentations
 
 Codebase for the [Koo Lab](https://koolab.cshl.edu/) at Cold Spring Harbor Laboratory.
 
 This is a work in progress.
 
-[![Results of continuous integration](https://github.com/p-koo/cipher/workflows/CI/badge.svg)](https://github.com/p-koo/cipher/actions/workflows/continuous-integration.yml)
-[![Codecov](https://img.shields.io/codecov/c/github/p-koo/cipher)](https://app.codecov.io/gh/p-koo/cipher/branch/master)
+[![Results of continuous integration](https://github.com/p-koo/libre/workflows/CI/badge.svg)](https://github.com/p-koo/libre/actions/workflows/continuous-integration.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/p-koo/libre)](https://app.codecov.io/gh/p-koo/libre/branch/master)
 
 # Install
 
@@ -13,7 +13,7 @@ One can install the master branch (the bleeding edge) with `pip`. One must also 
 TensorFlow.
 
 ```bash
-pip install https://github.com/p-koo/cipher/tarball/master tensorflow
+pip install https://github.com/p-koo/libre/tarball/master tensorflow
 ```
 
 # Developers
@@ -27,8 +27,8 @@ then one must take care to install the proper TensorFlow version for the given C
 and cuDNN versions.
 
 ```bash
-git clone https://github.com/p-koo/cipher.git
-cd cipher
+git clone https://github.com/p-koo/libre.git
+cd libre
 python -m venv venv
 source ./venv/bin/activate
 python -m pip install --no-cache-dir --upgrade pip setuptools wheel
@@ -47,5 +47,5 @@ pre-commit
 Run tests with `pytest`:
 
 ```bash
-pytest cipher
+pytest libre
 ```

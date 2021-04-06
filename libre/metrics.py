@@ -15,8 +15,8 @@ def evaluate(label, pred, metrics, verbose=True):
         metric_vals["aupr"] = aupr(label, pred)
     if "rsquare" in metrics:
         metric_vals["rsquare"] = rsquare(label, pred)
-    if "corr" in metrics:
-        metric_vals["corr"] = pearsonr(label, pred)
+    if "pearsonr" in metrics:
+        metric_vals["pearsonr"] = pearsonr(label, pred)
     if verbose:
         for metric_name in metrics:
             print(

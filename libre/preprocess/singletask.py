@@ -521,12 +521,3 @@ def split_dataset_by_chr(one_hot, labels, names, chromosome_test, chromosome_val
 
     return train, valid, test, indices
 
-
-
-# TODO: function to generate fasta file
-
-# TODO: function to load bed file to dataframe
-
-# TODO: function to save dataframe to a bed file
-
-# TODO: random split into k-fold cross validation
